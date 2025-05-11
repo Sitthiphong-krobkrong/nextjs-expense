@@ -1,5 +1,9 @@
 {
-  "homepage": "https://github.com/Sitthiphong-krobkrong/nextjs-expense",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Sitthiphong-krobkrong/nextjs-expense.git"
+  },
+  "homepage": "https://Sitthiphong-krobkrong.github.io/nextjs-expense",
   "name": "next-expense",
   "version": "0.1.0",
   "private": true,
@@ -8,9 +12,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "export": "next export",
-    "predeploy": "npm run build && npm run export",
-    "deploy": "gh-pages -d out"
+    "predeploy": "npm run build",
+    "deploy": "gh-pages -d out -r https://github.com/Sitthiphong-krobkrong/nextjs-expense.git"
   },
   "dependencies": {
     "font-awesome": "^4.7.0",
