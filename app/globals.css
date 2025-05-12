@@ -32,3 +32,7 @@ body{
 .bd{
   border: 1px solid var(--foreground);
 }
+
+.w-50px{
+  width: 50px;
+}

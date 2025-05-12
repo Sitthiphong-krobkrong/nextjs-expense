@@ -31,11 +31,11 @@ export default function TransactionList({ items, onEdit, onDelete }) {
               <td className="p-2 text-right">
                 {tx.type === 'expense' ? '-' : '+'}{tx.amount.toLocaleString()}
               </td>
-              <td className="p-2 text-center space-x-2">
-                <button onClick={() => onEdit(tx)} className="px-2 py-1 bg-yellow-400 rounded hover:bg-yellow-500">
+              <td className="p-2 text-center space-x-2 flex">
+                <button onClick={() => onEdit(tx)} className="px-2 py-1 bg-yellow-400 rounded hover:bg-yellow-500 w-50px">
                   แก้ไข
                 </button>
-                <button onClick={() => onDelete(tx.id)} className="px-2 py-1 bg-red-500 text-white rounded hover:bg-red-600">
+                <button onClick={() => onDelete(tx.id)} className="px-2 py-1 bg-red-500 text-white rounded hover:bg-red-600 w-50px">
                   ลบ
                 </button>
               </td>
