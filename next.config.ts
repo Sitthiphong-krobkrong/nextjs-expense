@@ -5,8 +5,8 @@ const nextConfig: NextConfig = {
   /* config options here */
   output: 'export',
   trailingSlash: true,
-  basePath: isProd ? "/nextjs-expense" : "",
-  assetPrefix: isProd ? "/nextjs-expense/" : "",
+  // basePath: isProd ? "/nextjs-expense" : "",
+  // assetPrefix: isProd ? "/nextjs-expense/" : "",
 };
 
 export default nextConfig;
