@@ -12,7 +12,9 @@ export default function TransactionList({ items, onEdit, onDelete }) {
   const [currentPage, setCurrentPage] = useState(1);
 
   const totalPages = Math.ceil(items.length / PAGE_SIZE);
-  const pagedItems = items.slice(
+  // Sort items by create_date descending before paginating
+  const sortedItems = [...items].sort((a, b) => new Date(b.date) - new Date(a.date));
+  const pagedItems = sortedItems.slice(
     (currentPage - 1) * PAGE_SIZE,
     currentPage * PAGE_SIZE
   );
