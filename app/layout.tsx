@@ -12,7 +12,7 @@ const kanit = Kanit({
 })
 export const metadata: Metadata = {
   title: "next-expense",
-  description: "Web Application (์Next.JS) Develop by sithiphong krobkrong",
+  description: "Web Application (Next.JS) Develop by sithiphong krobkrong",
 };
 
 export default function RootLayout({
