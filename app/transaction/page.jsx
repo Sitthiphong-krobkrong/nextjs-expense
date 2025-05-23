@@ -1,15 +1,16 @@
-'use client';
-import { useState, useEffect } from 'react';
+"use client";
+import { useState, useEffect } from "react";
 import {
   getTransactions,
   addTransaction,
   updateTransaction,
   deleteTransaction,
   saveTransactions,
-} from '../../services/transactionService';
-import TransactionForm from '../../components/TransactionForm';
-import TransactionList from '../../components/TransactionList';
-import Dashboard from '../../components/Dashboard';
+} from "../../services/transactionService";
+import TransactionForm from "../../components/TransactionForm";
+import TransactionList from "../../components/TransactionList";
+import Dashboard from "../../components/Dashboard";
+import Swal from "sweetalert2";
 
 export default function TransactionsPage() {
   const [transactions, setTransactions] = useState([]);
@@ -25,7 +26,7 @@ export default function TransactionsPage() {
     saveTransactions(transactions);
   }, [transactions]);
 
-  const handleSave = tx => {
+  const handleSave = (tx) => {
     if (editingTx) {
       updateTransaction(tx);
     } else {
@@ -45,15 +46,26 @@ export default function TransactionsPage() {
         <h1 className="text-3xl font-semibold mb-6">รายรับ-รายจ่าย</h1>
         <Dashboard transactions={transactions} />
         <TransactionForm
-          key={editingTx ? editingTx.id : 'new'}
+          key={editingTx ? editingTx.id : "new"}
           onSave={handleSave}
           editing={editingTx}
           onCancel={handleCancel}
         />
         <TransactionList
           items={transactions}
-          onEdit={tx => setEditingTx(tx)}
-          onDelete={id => {
+          onEdit={(tx) => setEditingTx(tx)}
+          onDelete={async (id) => {
+
+            const result = await Swal.fire({
+              title: "ยืนยันการลบรายการ?",
+              icon: "warning",
+              showCancelButton: true,
+              confirmButtonText: "ใช่, ลบ",
+              cancelButtonText: "ยกเลิก",
+            });
+
+            if (!result.isConfirmed) return;
+
             deleteTransaction(id);
             setTransactions(getTransactions());
           }}
