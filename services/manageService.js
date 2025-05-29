@@ -1,3 +1,4 @@
+import Swal from 'sweetalert2';
 import * as XLSX from 'xlsx';
 const STORAGE_KEY = 'transactions';
 export function exportExcelFromLocalStorage_v1(fileName = 'data.xlsx') {
@@ -18,7 +19,7 @@ export function exportExcelFromLocalStorage(fileNamePrefix = 'data') {
     const data = rawJson ? JSON.parse(rawJson) : [];
 
     if (data.length === 0) {
-        alert('No data to export.');
+        Swal.fire('No data to export.');
         return;
     }
 

@@ -1,37 +1,45 @@
-// Service layer: manage transaction data in localStorage
+// services/transactionService.ts
 const STORAGE_KEY = 'transactions';
 
-export function getTransactions() {
+// โหลดจาก storage
+export function loadTransactions() {
+  const data = localStorage.getItem(STORAGE_KEY);
   try {
-    const data = localStorage.getItem(STORAGE_KEY);
     return data ? JSON.parse(data) : [];
   } catch {
     return [];
   }
 }
 
-export function saveTransactions(transactions) {
+// เก็บลง storage
+function persist(transactions) {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(transactions));
 }
 
-export function addTransaction(tx) {
-  const transactions = getTransactions();
-  transactions.push(tx);
-  saveTransactions(transactions);
+// เพิ่มรายการ (assign id ให้ในนี้เลย)
+export function addTransaction(tx, list) {
+  const txWithId = { ...tx, id: Date.now() };
+  const updated = [...list, txWithId];
+  persist(updated);
+  return updated;
 }
 
-export function updateTransaction(updatedTx) {
-  const transactions = getTransactions().map(tx =>
-    tx.id === updatedTx.id ? updatedTx : tx
-  );
-  saveTransactions(transactions);
+// อัปเดตรายการ
+export function updateTransaction(tx, list) {
+  const updated = list.map((t) => (t.id === tx.id ? tx : t));
+  persist(updated);
+  return updated;
 }
 
-export function deleteTransaction(id) {
-  const transactions = getTransactions().filter(tx => tx.id !== id);
-  saveTransactions(transactions);
+// ลบรายการ
+export function deleteTransaction(id, list) {
+  const updated = list.filter((t) => t.id !== id);
+  persist(updated);
+  return updated;
 }
 
+// ลบทั้งหมด
 export function deleteAllTransactions() {
   localStorage.removeItem(STORAGE_KEY);
+  return [];
 }
