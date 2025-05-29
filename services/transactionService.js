@@ -31,3 +31,7 @@ export function deleteTransaction(id) {
   const transactions = getTransactions().filter(tx => tx.id !== id);
   saveTransactions(transactions);
 }
+
+export function deleteAllTransactions() {
+  localStorage.removeItem(STORAGE_KEY);
+}

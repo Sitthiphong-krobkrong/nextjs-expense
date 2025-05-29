@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import {
   getTransactions,
   addTransaction,
@@ -15,14 +15,19 @@ import Swal from "sweetalert2";
 export default function TransactionsPage() {
   const [transactions, setTransactions] = useState([]);
   const [editingTx, setEditingTx] = useState(null);
-
-  // Load transactions on mount
+  const isFirstRender = useRef(true); // ประกาศ useRef
+  
+  // โหลดข้อมูลครั้งแรก
   useEffect(() => {
     setTransactions(getTransactions());
   }, []);
 
-  // Save whenever transactions change
+  // save แต่ข้ามรอบแรกให้ได้ผลลัพธ์ที่ถูกต้อง
   useEffect(() => {
+    if (isFirstRender.current) {
+      isFirstRender.current = false;
+      return;
+    }
     saveTransactions(transactions);
   }, [transactions]);
 
@@ -32,7 +37,11 @@ export default function TransactionsPage() {
     } else {
       addTransaction(tx);
     }
-    setTransactions(getTransactions());
+    // setTransactions(getTransactions());
+    // setEditingTx(null);
+    const updated = getTransactions();
+    saveTransactions(updated);      // save ทันทีหลังเปลี่ยนแปลง
+    setTransactions(updated);
     setEditingTx(null);
   };
 
