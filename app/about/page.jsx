@@ -14,7 +14,7 @@ export default function AboutPage() {
                 <p className="text-base text-gray-600 mb-4 text-left">
                     เราใส่ใจในประสิทธิภาพและประสบการณ์ใช้งานของคุณ หากมีข้อเสนอแนะหรือพบปัญหาใด ๆ ติดต่อเราได้ที่
                     <a href="mailto: sitthiphong.krobkrong@gmail.com" className="text-blue-600 hover:underline ml-1">
-                        sitthiphong.krobkrong@gmail.com
+                        sitthiphong.krobkrong@gmail.com และ famecwk12@gmail.com
                     </a>
                 </p>
             </div>
