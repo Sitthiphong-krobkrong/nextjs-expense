@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState} from "react";
 // 'use client';
 export default function TransactionList({ items, onEdit, onDelete }) {
   const PAGE_SIZE = 5;
@@ -13,30 +13,6 @@ export default function TransactionList({ items, onEdit, onDelete }) {
     (currentPage - 1) * PAGE_SIZE,
     currentPage * PAGE_SIZE
   );
-
-  const [XLSX, setXLSX] = useState(null);
-
-  useEffect(() => {
-    import("xlsx").then((mod) => setXLSX(mod));
-  }, []);
-
-  const exportExcel = () => {
-    if (!XLSX) return;
-    const ws = XLSX.utils.json_to_sheet(items);
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, "Transactions");
-    const buf = XLSX.write(wb, { bookType: "xlsx", type: "array" });
-    const blob = new Blob([buf], { type: "application/octet-stream" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    const pad = (n) => n.toString().padStart(2, "0");
-    const now = new Date();
-    const fileName = `${pad(now.getDate())}${pad(now.getMonth() + 1)}${now.getFullYear()}${pad(now.getHours())}${pad(now.getMinutes())}${pad(now.getSeconds())}_transactions.xlsx`;
-    a.download = fileName;
-    a.click();
-    URL.revokeObjectURL(url);
-  };
 
   return (
     <div className="mt-6 mb-30 p-4 bg-white rounded-lg shadow">

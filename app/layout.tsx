@@ -3,6 +3,7 @@ import { Kanit } from "next/font/google";
 import "./globals.css";
 import Footer from "@/components/Footer";
 import Navbar from "@/components/Navbar";
+import DelayedLoader from "@/components/DelayedLoader";
 
 const kanit = Kanit({
   subsets: ['latin'],            // character sets you need
@@ -25,9 +26,11 @@ export default function RootLayout({
     <html lang="en">
       <body className={kanit.className}>
         <Navbar />
-        {children}
+         <DelayedLoader>{children}</DelayedLoader>
         <Footer />
       </body>
     </html>
   );
 }
+
+
