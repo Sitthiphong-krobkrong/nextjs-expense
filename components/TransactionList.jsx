@@ -1,4 +1,4 @@
-import { useState} from "react";
+import { useState } from "react";
 // 'use client';
 export default function TransactionList({ items, onEdit, onDelete }) {
   const PAGE_SIZE = 5;
@@ -57,10 +57,10 @@ export default function TransactionList({ items, onEdit, onDelete }) {
           <thead className="bg-gray-100">
             <tr>
               <th className="p-2">จัดการ</th>
+              <th className="p-2 text-center w-25">จำนวนเงิน </th>
+              <th className="p-2 text-center">รายละเอียด</th>
+              <th className="p-2 text-left">ประเภท </th>
               <th className="p-2 text-left">วันที่</th>
-              <th className="p-2 text-left">รายละเอียด</th>
-              <th className="p-2 text-left">ประเภท</th>
-              <th className="p-2 text-right">จำนวนเงิน</th>
             </tr>
           </thead>
           <tbody>
@@ -104,12 +104,14 @@ export default function TransactionList({ items, onEdit, onDelete }) {
                     </svg>
                   </button>
                 </td>
-                <td className="p-2 text-left">
-                  {tx.date
-                    ? new Date(tx.date).toLocaleDateString("th-TH")
-                    : "-"}
+                <td
+                  className={`p-2 text-right font-semibold ${tx.type === "expense" ? "text-red-600" : "text-green-600"
+                    }`}
+                >
+                  {tx.type === "expense" ? "-" : "+"}
+                  {tx.amount.toLocaleString()}
                 </td>
-                <td className="p-2">{tx.description}</td>
+                <td className="p-2 text-left">{tx.description}</td>
                 <td className="p-2 capitalize">
                   <span
                     className={
@@ -119,13 +121,12 @@ export default function TransactionList({ items, onEdit, onDelete }) {
                     {tx.type === "expense" ? "รายจ่าย" : "รายรับ"}
                   </span>
                 </td>
-                <td
-                  className={`p-2 text-right font-semibold ${
-                    tx.type === "expense" ? "text-red-600" : "text-green-600"
-                  }`}
-                >
-                  {tx.type === "expense" ? "-" : "+"}
-                  {tx.amount.toLocaleString()}
+
+
+                <td className="p-2 text-left">
+                  {tx.date
+                    ? new Date(tx.date).toLocaleDateString("th-TH")
+                    : "-"}
                 </td>
               </tr>
             ))}
@@ -177,11 +178,10 @@ export default function TransactionList({ items, onEdit, onDelete }) {
                   <button
                     key={i}
                     onClick={() => setCurrentPage(i)}
-                    className={`px-3 py-1 rounded ${
-                      currentPage === i
-                        ? "bg-blue-500 text-white"
-                        : "bg-gray-200"
-                    }`}
+                    className={`px-3 py-1 rounded ${currentPage === i
+                      ? "bg-blue-500 text-white"
+                      : "bg-gray-200"
+                      }`}
                   >
                     {i}
                   </button>

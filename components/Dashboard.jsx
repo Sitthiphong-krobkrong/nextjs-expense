@@ -38,9 +38,9 @@ export default function Dashboard({ transactions }) {
     [income, expense]
   );
 
-  const [showIncome, setShowIncome] = useState(true);
-  const [showExpense, setShowExpense] = useState(true);
-  const [showBalance, setShowBalance] = useState(true);
+  const [showIncome, setShowIncome] = useState(false);
+  const [showExpense, setShowExpense] = useState(false);
+  const [showBalance, setShowBalance] = useState(false);
   const handleToggleIncome = () => setShowIncome((prev) => !prev);
   const handleToggleExpense = () => setShowExpense((prev) => !prev);
   const handleToggleBalance = () => setShowBalance((prev) => !prev);

@@ -122,21 +122,22 @@ export default function TransactionForm({ onSave, editing, onCancel }) {
         </span>
         {editing ? "แก้ไขรายการ" : "เพิ่มรายการใหม่"}
       </h2>
-      <div>
-        <label className="block text-sm">รายละเอียด</label>
-        <input
-          type="text"
-          value={description}
-          onChange={(e) => setDescription(e.target.value)}
-          className="w-full mt-1 p-2 border rounded"
-        />
-      </div>
+
       <div>
         <label className="block text-sm">จำนวนเงิน</label>
         <input
           type="number"
           value={amount}
           onChange={(e) => setAmount(e.target.value)}
+          className="w-full mt-1 p-2 border rounded"
+        />
+      </div>
+      <div>
+        <label className="block text-sm">รายละเอียด</label>
+        <input
+          type="text"
+          value={description}
+          onChange={(e) => setDescription(e.target.value)}
           className="w-full mt-1 p-2 border rounded"
         />
       </div>
