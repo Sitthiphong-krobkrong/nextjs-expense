@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import Swal from "sweetalert2";
 /**
  * Form to add or edit a transaction
@@ -8,6 +8,10 @@ export default function TransactionForm({ onSave, editing, onCancel }) {
   const [description, setDescription] = useState("");
   const [amount, setAmount] = useState("");
   const [type, setType] = useState("expense");
+  const fileRef = useRef();
+  const [loading, setLoading] = useState(false);
+  const [showOverlay, setShowOverlay] = useState(false);
+  const loadingTimeout = useRef();
 
   useEffect(() => {
     if (editing) {
@@ -75,6 +79,103 @@ export default function TransactionForm({ onSave, editing, onCancel }) {
     });
   }
 
+  // ฟังก์ชันสำหรับ handle loading timeout
+  const handleTimeout = () => {
+    setLoading(false);
+    setShowOverlay(false);
+    Swal.fire({
+      icon: "error",
+      title: "ขออภัย",
+      text: "การอัปโหลดใช้เวลานานเกินไป (15 วินาที)",
+      confirmButtonText: "ตกลง",
+    });
+  };
+
+  const handleFileChange = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const formData = new FormData();
+    formData.append("file", file);
+
+    setLoading(true);
+    setShowOverlay(true);
+
+    // ตั้ง timeout 15 วิ
+    //loadingTimeout.current = setTimeout(handleTimeout, 15000);
+
+    try {
+      const res = await fetch("http://localhost:8000/ocr/slip", {
+        method: "POST",
+        body: formData,
+      });
+
+      //clearTimeout(loadingTimeout.current); // clear ทันทีที่ API ตอบกลับ
+      setLoading(false);
+      setShowOverlay(false);
+
+      // กรณี API error (HTTP 400+, หรือ network error)
+      if (!res.ok) {
+        const errData = await res.json().catch(() => ({}));
+        throw new Error(
+          errData.message || `API error: ${res.status} ${res.statusText}`
+        );
+      }
+
+      // กรณี response 200+
+      const data = await res.json();
+
+      // ถ้ามี data.url → สำเร็จ
+      if (data.url) {
+        await Swal.fire({
+          icon: "success",
+          title: "อัปโหลดไฟล์สำเร็จ",
+          html: `<a href="${data.url}" target="_blank" class="underline text-blue-600">${data.url}</a>`,
+          confirmButtonText: "ตกลง",
+        });
+        fileRef.current.value = "";
+        return;
+      }
+
+      // กรณีเป็น slip OCR ตรงนี้เลย
+      if (data.amount) {
+        await Swal.fire({
+          icon: "success",
+          title: "อ่านข้อมูลจำนวนเงินสำเร็จ",
+          text: `จำนวนเงินที่พบ: ${data.amount}`,
+          confirmButtonText: "ตกลง",
+        });
+        setAmount(data.amount);
+        fileRef.current.value = "";
+        return;
+      }
+
+      // ถ้าไม่เจอ amount
+      await Swal.fire({
+        icon: "info",
+        title: "อ่านข้อมูลจำนวนเงินในไฟล์ไม่สำเร็จ [code:400]",
+        text: "กรุณากรอกจำนวนเงินด้วยตนเอง",
+        confirmButtonText: "ตกลง",
+      });
+      fileRef.current.value = "";
+
+    } catch (err) {
+      clearTimeout(loadingTimeout.current);
+      setLoading(false);
+      setShowOverlay(false);
+      await Swal.fire({
+        icon: "error",
+        title: "อ่านข้อมูลจำนวนเงินในไฟล์ไม่สำเร็จ [code:500]",
+        text: "กรุณากรอกจำนวนเงินด้วยตนเอง",
+        confirmButtonText: "ตกลง",
+      });
+      console.error(err.message);
+    } finally {
+      setLoading(false);
+      setShowOverlay(false);
+    }
+  };
+
   return (
     <form
       onSubmit={handleSubmit}
@@ -122,6 +223,62 @@ export default function TransactionForm({ onSave, editing, onCancel }) {
         </span>
         {editing ? "แก้ไขรายการ" : "เพิ่มรายการใหม่"}
       </h2>
+
+      <div className="relative">
+        {/* Overlay Loading */}
+        {showOverlay && (
+          <div
+            className="fixed inset-0 bg-black bg-opacity-40 flex flex-col items-center justify-center z-50"
+            style={{ pointerEvents: "auto" }}
+          >
+            <svg
+              className="animate-spin mb-4"
+              width={54}
+              height={54}
+              viewBox="0 0 50 50"
+            >
+              <circle
+                className="opacity-25"
+                cx="25"
+                cy="25"
+                r="20"
+                fill="none"
+                stroke="#fff"
+                strokeWidth="4"
+              />
+              <path
+                className="opacity-75"
+                fill="#fff"
+                d="M25 5a20 20 0 0 1 20 20h-4a16 16 0 1 0-16 16V5z"
+              />
+            </svg>
+            <div className="text-white text-lg font-bold">
+              กำลังประมวลผล กรุณารอสักครู่...
+            </div>
+          </div>
+        )}
+
+        <label className="block text-sm font-medium mb-1">แนบไฟล์</label>
+        <input
+          ref={fileRef}
+          type="file"
+          accept=".jpg,.jpeg,.png,.pdf"
+          disabled={loading}
+          onChange={handleFileChange}
+          className="w-full mt-1 p-2 border rounded"
+        />
+        {/* <button
+          disabled={loading}
+          className={`mt-3 px-4 py-2 rounded ${loading
+            ? "bg-gray-300 cursor-not-allowed"
+            : "bg-blue-600 hover:bg-blue-700 text-white"
+            }`}
+          onClick={() => fileRef.current.click()}
+          type="button"
+        >
+          ตรวจสอบไฟล์แนบ
+        </button> */}
+      </div>
 
       <div>
         <label className="block text-sm">จำนวนเงิน</label>
