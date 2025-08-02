@@ -12,6 +12,7 @@ export default function TransactionForm({ onSave, editing, onCancel }) {
   const [loading, setLoading] = useState(false);
   const [showOverlay, setShowOverlay] = useState(false);
   const loadingTimeout = useRef();
+  const [subType, setSubType] = useState("expense");
 
   useEffect(() => {
     if (editing) {
@@ -258,7 +259,7 @@ export default function TransactionForm({ onSave, editing, onCancel }) {
           </div>
         )}
 
-        <label className="block text-sm font-medium mb-1">แนบไฟล์</label>
+        {/* <label className="block text-sm font-medium mb-1">แนบไฟล์</label>
         <input
           ref={fileRef}
           type="file"
@@ -266,7 +267,7 @@ export default function TransactionForm({ onSave, editing, onCancel }) {
           disabled={loading}
           onChange={handleFileChange}
           className="w-full mt-1 p-2 border rounded"
-        />
+        /> */}
         {/* <button
           disabled={loading}
           className={`mt-3 px-4 py-2 rounded ${loading
@@ -313,6 +314,29 @@ export default function TransactionForm({ onSave, editing, onCancel }) {
           <option value="expense">-รายจ่าย</option>
         </select>
       </div>
+      {/* <div>
+        <label className="block text-sm">ประเภทย่อย</label>
+        <select
+          value={subType}
+          onChange={(e) => setSubType(e.target.value)}
+          className={
+            type === "expense"
+              ? "text-red-500  w-full mt-1 p-2 border rounded"
+              : "text-green-500 w-full mt-1 p-2 border rounded"
+          }
+        >
+          <option value="food">-อาหาร</option>
+          <option value="transport">-ขนส่ง</option>
+          <option value="entertainment">-บันเทิง</option>
+          <option value="utilities">-ค่าสาธารณูปโภค</option>
+          <option value="shopping">-ช้อปปิ้ง</option>
+          <option value="health">-สุขภาพ</option>
+          <option value="education">-การศึกษา</option>
+          <option value="salary">+เงินได้</option>
+          <option value="gift">+ของขวัญ</option>
+          <option value="other">-อื่นๆ</option>
+        </select>
+      </div> */}
       <div className="flex gap-2">
         <button
           type="submit"
