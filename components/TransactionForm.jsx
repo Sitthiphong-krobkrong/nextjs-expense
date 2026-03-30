@@ -1,6 +1,7 @@
 "use client";
 import { useState, useEffect, useRef } from "react";
 import Swal from "sweetalert2";
+import useSpeechRecognition from "../app/hooks/useSpeechRecognition";
 /**
  * Form to add or edit a transaction
  */
@@ -13,6 +14,31 @@ export default function TransactionForm({ onSave, editing, onCancel }) {
   const [showOverlay, setShowOverlay] = useState(false);
   const loadingTimeout = useRef();
   const [subType, setSubType] = useState("expense");
+
+  const { isListening, isSupported, error: speechError, startListening, stopListening } = useSpeechRecognition();
+
+  const handleVoiceInput = () => {
+    if (isListening) {
+      stopListening();
+      return;
+    }
+    startListening((result) => {
+      if (result.amount) setAmount(result.amount);
+      if (result.description) setDescription(result.description);
+      setType(result.type);
+      Swal.fire({
+        icon: "success",
+        title: "รับเสียงสำเร็จ",
+        html: `<div class="text-left text-sm">
+          <p><b>คำพูด:</b> ${result.transcript}</p>
+          <p><b>รายละเอียด:</b> ${result.description || "-"}</p>
+          <p><b>จำนวนเงิน:</b> ${result.amount || "-"}</p>
+          <p><b>ประเภท:</b> ${result.type === "income" ? "รายรับ" : "รายจ่าย"}</p>
+        </div>`,
+        confirmButtonText: "ตกลง",
+      });
+    });
+  };
 
   useEffect(() => {
     if (editing) {
@@ -224,6 +250,52 @@ export default function TransactionForm({ onSave, editing, onCancel }) {
         </span>
         {editing ? "แก้ไขรายการ" : "เพิ่มรายการใหม่"}
       </h2>
+
+      {isSupported && (
+        <div className="flex flex-col items-center gap-2">
+          <button
+            type="button"
+            onClick={handleVoiceInput}
+            className={`flex items-center gap-2 px-4 py-2 rounded-full text-white transition-all ${
+              isListening
+                ? "bg-red-500 hover:bg-red-600 animate-pulse"
+                : "bg-blue-500 hover:bg-blue-600"
+            }`}
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="w-5 h-5"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M19 11a7 7 0 01-14 0M12 1a3 3 0 00-3 3v7a3 3 0 006 0V4a3 3 0 00-3-3z"
+              />
+              {isListening && (
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M12 19v2m-3 0h6"
+                />
+              )}
+            </svg>
+            {isListening ? "กำลังฟัง... กดเพื่อหยุด" : "พูดเพื่อบันทึก"}
+          </button>
+          {isListening && (
+            <p className="text-sm text-red-500 animate-pulse">
+              กำลังฟังเสียง... พูดได้เลย เช่น &quot;กินข้าว 50 บาท&quot;
+            </p>
+          )}
+          {speechError && (
+            <p className="text-sm text-red-500">{speechError}</p>
+          )}
+        </div>
+      )}
 
       <div className="relative">
         {/* Overlay Loading */}
