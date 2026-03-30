@@ -80,6 +80,7 @@ export default function useSpeechRecognition() {
       recognition.onresult = (event: any) => {
         const transcript = event.results[0][0].transcript;
         const parsed = parseTranscript(transcript);
+        recognition.stop();
         onResult(parsed);
       };
 
