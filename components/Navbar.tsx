@@ -3,6 +3,8 @@ import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
+import { ThemeToggle } from "@/components/ThemeToggle";
+
 const Navbar = () => {
   const [isMobile, setIsMobile] = useState(false);
   const [showMobileMenu, setShowMobileMenu] = useState(false);
@@ -25,7 +27,7 @@ const Navbar = () => {
   ];
 
   return (
-    <nav className="relative z-50" style={{
+    <nav className="relative z-50 transition-colors duration-300" style={{
       background: "linear-gradient(135deg, #0f4c75 0%, #1b6ca8 50%, #0e7490 100%)",
       boxShadow: "0 4px 20px rgba(15, 76, 117, 0.4)",
     }}>
@@ -50,45 +52,50 @@ const Navbar = () => {
           </div>
         </Link>
 
-        {/* Desktop nav */}
-        {!isMobile && (
-          <ul style={{ listStyle: "none", display: "flex", gap: "0.5rem", margin: 0, padding: 0, alignItems: "center" }}>
-            {navLinks.map(({ href, label }) => (
-              <li key={href}>
-                <Link
-                  href={href}
-                  style={{
-                    color: pathname === href ? "#fff" : "rgba(255,255,255,0.75)",
-                    textDecoration: "none",
-                    fontSize: "0.95rem",
-                    fontWeight: pathname === href ? "600" : "400",
-                    padding: "0.5rem 1rem",
-                    borderRadius: "8px",
-                    background: pathname === href ? "rgba(255,255,255,0.15)" : "transparent",
-                    display: "block",
-                  }}
-                  onMouseEnter={(e) => {
-                    if (pathname !== href) {
-                      (e.target as HTMLElement).style.background = "rgba(255,255,255,0.1)";
-                      (e.target as HTMLElement).style.color = "#fff";
-                    }
-                  }}
-                  onMouseLeave={(e) => {
-                    if (pathname !== href) {
-                      (e.target as HTMLElement).style.background = "transparent";
-                      (e.target as HTMLElement).style.color = "rgba(255,255,255,0.75)";
-                    }
-                  }}
-                >
-                  {label}
-                </Link>
-              </li>
-            ))}
-          </ul>
-        )}
+        {/* Right Actions Container */}
+        <div style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
+          {/* Desktop nav */}
+          {!isMobile && (
+            <ul style={{ listStyle: "none", display: "flex", gap: "0.5rem", margin: 0, padding: 0, alignItems: "center" }}>
+              {navLinks.map(({ href, label }) => (
+                <li key={href}>
+                  <Link
+                    href={href}
+                    style={{
+                      color: pathname === href ? "#fff" : "rgba(255,255,255,0.75)",
+                      textDecoration: "none",
+                      fontSize: "0.95rem",
+                      fontWeight: pathname === href ? "600" : "400",
+                      padding: "0.5rem 1rem",
+                      borderRadius: "8px",
+                      background: pathname === href ? "rgba(255,255,255,0.15)" : "transparent",
+                      display: "block",
+                    }}
+                    onMouseEnter={(e) => {
+                      if (pathname !== href) {
+                        (e.target as HTMLElement).style.background = "rgba(255,255,255,0.1)";
+                        (e.target as HTMLElement).style.color = "#fff";
+                      }
+                    }}
+                    onMouseLeave={(e) => {
+                      if (pathname !== href) {
+                        (e.target as HTMLElement).style.background = "transparent";
+                        (e.target as HTMLElement).style.color = "rgba(255,255,255,0.75)";
+                      }
+                    }}
+                  >
+                    {label}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          )}
 
-        {/* Hamburger */}
-        {isMobile && (
+          {/* Theme Toggle */}
+          <ThemeToggle />
+
+          {/* Hamburger */}
+          {isMobile && (
           <>
             <button
               onClick={() => setShowMobileMenu((prev) => !prev)}
@@ -143,6 +150,7 @@ const Navbar = () => {
             )}
           </>
         )}
+        </div>
       </div>
     </nav>
   );

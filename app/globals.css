@@ -1,9 +1,38 @@
 @import "tailwindcss";
 
+@custom-variant dark (&:is(.dark *));
+
+.text-gradient-primary {
+  background: linear-gradient(135deg, #0e7490, #0f4c75);
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.dark .text-gradient-primary {
+  background: linear-gradient(135deg, #38bdf8, #818cf8);
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
 body {
-  color: #1a2332;
-  background: linear-gradient(135deg, #f0f9ff 0%, #f0fdf4 50%, #ecfdf5 100%);
+  color: #0f172a;
+  background-color: #f8fafc;
+  background-image: 
+    radial-gradient(at 0% 0%, rgba(14, 165, 233, 0.12) 0px, transparent 50%),
+    radial-gradient(at 100% 0%, rgba(16, 185, 129, 0.12) 0px, transparent 50%),
+    radial-gradient(at 50% 100%, rgba(99, 102, 241, 0.12) 0px, transparent 50%);
+  background-attachment: fixed;
+  background-size: 200% 200%;
+  animation: bgGlow 15s ease infinite alternate;
   min-height: 100vh;
+  margin: 0;
+}
+
+@keyframes bgGlow {
+  0% { background-position: 0% 50%; }
+  100% { background-position: 100% 50%; }
 }
 
 ::-webkit-scrollbar {
@@ -11,29 +40,45 @@ body {
   height: 6px;
 }
 ::-webkit-scrollbar-track {
-  background: #f1f5f9;
+  background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  background: #94a3b8;
-  border-radius: 3px;
+  background: rgba(148, 163, 184, 0.5);
+  border-radius: 6px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(148, 163, 184, 0.8);
 }
 
 .bd {
   border: 1px solid var(--foreground);
 }
 
-.w-50px {
-  width: 50px;
+.glass-card {
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid rgba(255, 255, 255, 1);
+  box-shadow: 0 10px 40px -10px rgba(0, 0, 0, 0.08);
 }
 
-.glass-card {
-  background: rgba(255, 255, 255, 0.9);
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.7);
+.dark body {
+  color: #f1f5f9;
+  background-color: #020617;
+  background-image: 
+    radial-gradient(at 0% 0%, rgba(56, 189, 248, 0.15) 0px, transparent 50%),
+    radial-gradient(at 100% 0%, rgba(139, 92, 246, 0.15) 0px, transparent 50%),
+    radial-gradient(at 50% 100%, rgba(16, 185, 129, 0.1) 0px, transparent 50%);
+}
+
+.dark .glass-card {
+  background: rgba(15, 23, 42, 0.75);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 10px 40px -10px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.05);
 }
 
 * {
-  transition-property: color, background-color, border-color, box-shadow, transform, opacity;
-  transition-duration: 150ms;
-  transition-timing-function: ease-in-out;
+  transition-property: color, background-color, border-color, box-shadow, opacity;
+  transition-duration: 300ms;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
 }

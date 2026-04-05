@@ -17,17 +17,21 @@ export const metadata: Metadata = {
   description: "Web Application (Next.JS) Develop by sithiphong krobkrong",
 };
 
+import { ThemeProvider } from "@/components/ThemeProvider";
+
 export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <body className={kanit.className}>
-        <Navbar />
-         <DelayedLoader>{children}</DelayedLoader>
-        <Footer />
+        <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
+          <Navbar />
+          <DelayedLoader>{children}</DelayedLoader>
+          <Footer />
+        </ThemeProvider>
       </body>
     </html>
   );
