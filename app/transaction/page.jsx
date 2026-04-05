@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import {
   loadTransactions,
   addTransaction,
@@ -12,7 +12,6 @@ import Dashboard from "../../components/Dashboard";
 import Swal from "sweetalert2";
 
 export default function TransactionsPage() {
-  // โหลดครั้งเดียวตอน mount
   const [transactions, setTransactions] = useState(() => loadTransactions());
   const [editingTx, setEditingTx] = useState(null);
 
@@ -31,6 +30,8 @@ export default function TransactionsPage() {
       showCancelButton: true,
       confirmButtonText: "ใช่, ลบ",
       cancelButtonText: "ยกเลิก",
+      confirmButtonColor: "#ef4444",
+      cancelButtonColor: "#6b7280",
     });
     if (!isConfirmed) return;
     const updated = deleteTransaction(id, transactions);
@@ -38,11 +39,20 @@ export default function TransactionsPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 p-8">
+    <div className="min-h-screen py-8 px-4">
       <div className="max-w-3xl mx-auto">
-        <h1 className="text-4xl font-bold mb-4 text-center">
-          รายรับ-รายจ่าย
-        </h1>
+        <div className="text-center mb-8">
+          <h1 className="text-4xl font-bold mb-2" style={{
+            background: "linear-gradient(135deg, #0e7490, #0f4c75)",
+            WebkitBackgroundClip: "text",
+            WebkitTextFillColor: "transparent",
+            backgroundClip: "text",
+          }}>
+            รายรับ-รายจ่าย
+          </h1>
+          <p className="text-gray-500 text-sm">ติดตามการเงินของคุณได้ง่ายๆ</p>
+        </div>
+
         <Dashboard transactions={transactions} />
         <TransactionForm
           key={editingTx ? editingTx.id : "new"}

@@ -1,222 +1,265 @@
+"use client";
 import { useState } from "react";
-// 'use client';
+
 export default function TransactionList({ items, onEdit, onDelete }) {
   const PAGE_SIZE = 5;
   const [currentPage, setCurrentPage] = useState(1);
 
   const totalPages = Math.ceil(items.length / PAGE_SIZE);
-  // Sort items by create_date descending before paginating
-  const sortedItems = [...items].sort(
-    (a, b) => new Date(b.date) - new Date(a.date)
-  );
+  const sortedItems = [...items].sort((a, b) => new Date(b.date) - new Date(a.date));
   const pagedItems = sortedItems.slice(
     (currentPage - 1) * PAGE_SIZE,
     currentPage * PAGE_SIZE
   );
 
   return (
-    <div className="mt-6 mb-30 p-4 bg-white rounded-lg shadow">
-      <div className="flex justify-between items-center mb-4">
-        <div>
-          <h2 className="text-xl font-semibold mb-2">
-            รายการทั้งหมด{" "}
-            <span className="text-sm text-gray-500"># = {items.length}</span>
-          </h2>
-        </div>
-        <div>
-          {/* /* id-card icon */}
-          <svg
-            className="w-5 h-5 text-gray-600"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            viewBox="0 0 24 24"
-          >
-            <rect
-              x="3"
-              y="5"
-              width="18"
-              height="14"
-              rx="2"
-              stroke="currentColor"
-              fill="none"
-            />
-            <circle cx="9" cy="12" r="3" stroke="currentColor" fill="none" />
-            <path d="M15 11h2M15 15h2" stroke="currentColor" />
-          </svg>
-          {/* <button
-            onClick={exportExcel}
-            className="px-4 py-2 bg-blue-600 text-white rounded"
-          >
-            export excel
-          </button> */}
+    <div
+      className="glass-card rounded-2xl shadow-lg overflow-hidden mb-8"
+      style={{ boxShadow: "0 4px 24px rgba(14, 116, 144, 0.1)" }}
+    >
+      {/* Header */}
+      <div className="px-5 py-4 border-b border-gray-100 flex justify-between items-center"
+        style={{ background: "linear-gradient(135deg, #e0f2fe, #cffafe)" }}
+      >
+        <div className="flex items-center gap-3">
+          <div style={{
+            width: "36px", height: "36px", borderRadius: "10px",
+            background: "rgba(255,255,255,0.7)", display: "flex",
+            alignItems: "center", justifyContent: "center",
+          }}>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#0e7490" strokeWidth="2">
+              <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2"/>
+              <rect x="9" y="3" width="6" height="4" rx="1"/>
+              <path d="M9 12h6M9 16h4"/>
+            </svg>
+          </div>
+          <div>
+            <h2 className="text-lg font-semibold" style={{ color: "#0c4a6e" }}>รายการทั้งหมด</h2>
+            <p className="text-xs" style={{ color: "#0e7490" }}>{items.length} รายการ</p>
+          </div>
         </div>
       </div>
-      <div className="overflow-x-auto">
-        <table className="min-w-[600px] w-full bg-white rounded-lg shadow overflow-hidden">
-          <thead className="bg-gray-100">
-            <tr>
-              <th className="p-2">จัดการ</th>
-              <th className="p-2 text-center w-25">จำนวนเงิน </th>
-              <th className="p-2 text-center">รายละเอียด</th>
-              <th className="p-2 text-left">ประเภท </th>
-              <th className="p-2 text-left">วันที่</th>
-            </tr>
-          </thead>
-          <tbody>
+
+      {/* Content */}
+      {pagedItems.length === 0 ? (
+        <div className="py-16 flex flex-col items-center justify-center text-gray-400">
+          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#d1d5db" strokeWidth="1.5" className="mb-3">
+            <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2"/>
+            <rect x="9" y="3" width="6" height="4" rx="1"/>
+            <path d="M9 12h6M9 16h4"/>
+          </svg>
+          <p className="text-sm">ยังไม่มีรายการ</p>
+          <p className="text-xs mt-1">เพิ่มรายการแรกของคุณด้านบน</p>
+        </div>
+      ) : (
+        <>
+          {/* Mobile card view */}
+          <div className="block md:hidden divide-y divide-gray-100">
             {pagedItems.map((tx) => (
-              <tr key={tx.id} className="border-t">
-                <td className="p-2 text-center space-x-2 flex justify-center">
+              <div key={tx.id} className="px-4 py-4 flex items-center gap-3">
+                {/* Amount badge */}
+                <div className="flex-shrink-0 w-14 text-right">
+                  <span className="font-bold text-sm" style={{ color: tx.type === "expense" ? "#ef4444" : "#10b981" }}>
+                    {tx.type === "expense" ? "-" : "+"}{tx.amount.toLocaleString()}
+                  </span>
+                  <p className="text-xs text-gray-400">฿</p>
+                </div>
+                {/* Info */}
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium text-gray-800 truncate">{tx.description}</p>
+                  <div className="flex items-center gap-2 mt-1">
+                    <span
+                      className="px-2 py-0.5 rounded-full text-xs font-medium"
+                      style={tx.type === "expense"
+                        ? { background: "#fee2e2", color: "#b91c1c" }
+                        : { background: "#d1fae5", color: "#065f46" }
+                      }
+                    >
+                      {tx.type === "expense" ? "รายจ่าย" : "รายรับ"}
+                    </span>
+                    <span className="text-xs text-gray-400">
+                      {tx.date ? new Date(tx.date).toLocaleDateString("th-TH") : "-"}
+                    </span>
+                  </div>
+                </div>
+                {/* Actions */}
+                <div className="flex gap-2 flex-shrink-0">
                   <button
                     onClick={() => onEdit(tx)}
-                    className="p-2 bg-yellow-400 rounded hover:bg-yellow-500 flex items-center justify-center"
                     aria-label="แก้ไข"
+                    className="p-2.5 rounded-xl"
+                    style={{
+                      background: "linear-gradient(135deg, #fef3c7, #fde68a)",
+                      border: "1px solid #f59e0b30",
+                    }}
                   >
-                    {/* pencil icon */}
-                    <svg
-                      className="w-5 h-5 text-gray-700"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      viewBox="0 0 24 24"
-                    >
-                      <path d="M15.232 5.232l3.536 3.536M9 13l6.586-6.586a2 2 0 112.828 2.828L11.828 15.828a2 2 0 01-2.828 0L9 13z" />
-                      <path d="M7 17h2a2 2 0 002-2v-2" />
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#92400e" strokeWidth="2.5">
+                      <path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/>
+                      <path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/>
                     </svg>
                   </button>
                   <button
                     onClick={() => onDelete(tx.id)}
-                    className="p-2 bg-red-500 text-white rounded hover:bg-red-600 flex items-center justify-center"
                     aria-label="ลบ"
+                    className="p-2.5 rounded-xl"
+                    style={{
+                      background: "linear-gradient(135deg, #fee2e2, #fecaca)",
+                      border: "1px solid #ef444430",
+                    }}
                   >
-                    {/* trash icon */}
-                    <svg
-                      className="w-5 h-5 text-white"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      viewBox="0 0 24 24"
-                    >
-                      <path d="M3 6h18" />
-                      <path d="M8 6V4a2 2 0 012-2h4a2 2 0 012 2v2" />
-                      <path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6" />
-                      <path d="M10 11v6M14 11v6" />
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#991b1b" strokeWidth="2.5">
+                      <path d="M3 6h18M8 6V4a2 2 0 012-2h4a2 2 0 012 2v2M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/>
+                      <path d="M10 11v6M14 11v6"/>
                     </svg>
                   </button>
-                </td>
-                <td
-                  className={`p-2 text-right font-semibold ${tx.type === "expense" ? "text-red-600" : "text-green-600"
-                    }`}
-                >
-                  {tx.type === "expense" ? "-" : "+"}
-                  {tx.amount.toLocaleString()}
-                </td>
-                <td className="p-2 text-left">{tx.description}</td>
-                <td className="p-2 capitalize">
-                  <span
-                    className={
-                      tx.type === "expense" ? "text-red-600" : "text-green-600"
-                    }
-                  >
-                    {tx.type === "expense" ? "รายจ่าย" : "รายรับ"}
-                  </span>
-                </td>
-
-
-                <td className="p-2 text-left">
-                  {tx.date
-                    ? new Date(tx.date).toLocaleDateString("th-TH")
-                    : "-"}
-                </td>
-              </tr>
+                </div>
+              </div>
             ))}
-          </tbody>
-        </table>
-      </div>
-      {/* Pagination Controls */}
-      <div className="flex flex-wrap justify-center mt-4 gap-2">
-        <button
-          onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-          disabled={currentPage === 1}
-          className="px-3 py-1 bg-gray-200 rounded disabled:opacity-50 flex items-center justify-center"
-          aria-label="ก่อนหน้า"
-        >
-          {/* chevron-left icon */}
-          <svg
-            className="w-4 h-4 text-gray-700"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            viewBox="0 0 24 24"
-          >
-            <path d="M15 19l-7-7 7-7" />
-          </svg>
-        </button>
-        <div className="flex flex-wrap gap-1 max-w-full overflow-x-auto">
-          {(() => {
-            // Pagination group logic: show 5 page numbers at a time
-            const groupSize = 5;
-            const currentGroup = Math.floor((currentPage - 1) / groupSize);
-            const start = currentGroup * groupSize + 1;
-            const end = Math.min(start + groupSize - 1, totalPages);
-            const pageNumbers = [];
-            for (let i = start; i <= end; i++) {
-              pageNumbers.push(i);
-            }
-            return (
-              <>
-                {start > 1 && (
-                  <button
-                    onClick={() => setCurrentPage(start - 1)}
-                    className="px-2 py-1 rounded bg-gray-100 text-gray-500"
-                    aria-label="Previous group"
+          </div>
+
+          {/* Desktop table view */}
+          <div className="hidden md:block overflow-x-auto">
+            <table className="w-full">
+              <thead>
+                <tr style={{ background: "#f8fafc" }}>
+                  <th className="px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide text-center w-24">จัดการ</th>
+                  <th className="px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide text-right">จำนวนเงิน</th>
+                  <th className="px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide text-left">รายละเอียด</th>
+                  <th className="px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide text-left">ประเภท</th>
+                  <th className="px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide text-left">วันที่</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-50">
+                {pagedItems.map((tx, idx) => (
+                  <tr
+                    key={tx.id}
+                    style={{ background: idx % 2 === 0 ? "#fff" : "#fafafa" }}
+                    className="hover:bg-cyan-50 transition-colors"
                   >
-                    &lt;
-                  </button>
-                )}
-                {pageNumbers.map((i) => (
-                  <button
-                    key={i}
-                    onClick={() => setCurrentPage(i)}
-                    className={`px-3 py-1 rounded ${currentPage === i
-                      ? "bg-blue-500 text-white"
-                      : "bg-gray-200"
-                      }`}
-                  >
-                    {i}
-                  </button>
+                    <td className="px-4 py-3">
+                      <div className="flex items-center justify-center gap-2">
+                        <button
+                          onClick={() => onEdit(tx)}
+                          aria-label="แก้ไข"
+                          className="p-2 rounded-lg hover:scale-110 transition-transform"
+                          style={{
+                            background: "linear-gradient(135deg, #fef3c7, #fde68a)",
+                            border: "1px solid #f59e0b30",
+                            boxShadow: "0 1px 4px rgba(245, 158, 11, 0.2)",
+                          }}
+                        >
+                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#92400e" strokeWidth="2.5">
+                            <path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/>
+                            <path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                          </svg>
+                        </button>
+                        <button
+                          onClick={() => onDelete(tx.id)}
+                          aria-label="ลบ"
+                          className="p-2 rounded-lg hover:scale-110 transition-transform"
+                          style={{
+                            background: "linear-gradient(135deg, #fee2e2, #fecaca)",
+                            border: "1px solid #ef444430",
+                            boxShadow: "0 1px 4px rgba(239, 68, 68, 0.2)",
+                          }}
+                        >
+                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#991b1b" strokeWidth="2.5">
+                            <path d="M3 6h18M8 6V4a2 2 0 012-2h4a2 2 0 012 2v2M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/>
+                            <path d="M10 11v6M14 11v6"/>
+                          </svg>
+                        </button>
+                      </div>
+                    </td>
+                    <td className="px-4 py-3 text-right">
+                      <span
+                        className="font-bold text-base"
+                        style={{ color: tx.type === "expense" ? "#ef4444" : "#10b981" }}
+                      >
+                        {tx.type === "expense" ? "-" : "+"}{tx.amount.toLocaleString()} ฿
+                      </span>
+                    </td>
+                    <td className="px-4 py-3 text-gray-700 text-sm">{tx.description}</td>
+                    <td className="px-4 py-3">
+                      <span
+                        className="px-2.5 py-1 rounded-full text-xs font-semibold"
+                        style={tx.type === "expense"
+                          ? { background: "#fee2e2", color: "#b91c1c" }
+                          : { background: "#d1fae5", color: "#065f46" }
+                        }
+                      >
+                        {tx.type === "expense" ? "รายจ่าย" : "รายรับ"}
+                      </span>
+                    </td>
+                    <td className="px-4 py-3 text-sm text-gray-500">
+                      {tx.date ? new Date(tx.date).toLocaleDateString("th-TH") : "-"}
+                    </td>
+                  </tr>
                 ))}
-                {end < totalPages && (
-                  <button
-                    onClick={() => setCurrentPage(end + 1)}
-                    className="px-2 py-1 rounded bg-gray-100 text-gray-500"
-                    aria-label="Next group"
-                  >
-                    &gt;
-                  </button>
-                )}
-              </>
-            );
-          })()}
+              </tbody>
+            </table>
+          </div>
+        </>
+      )}
+
+      {/* Pagination */}
+      {totalPages > 1 && (
+        <div className="px-5 py-4 border-t border-gray-100 flex items-center justify-between flex-wrap gap-3">
+          <p className="text-xs text-gray-500">
+            หน้า {currentPage} จาก {totalPages}
+          </p>
+          <div className="flex gap-1.5 flex-wrap">
+            <button
+              onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+              disabled={currentPage === 1}
+              className="px-3 py-1.5 rounded-lg text-sm font-medium disabled:opacity-40"
+              style={{
+                background: "linear-gradient(135deg, #e0f2fe, #cffafe)",
+                color: "#0c4a6e",
+                border: "1px solid #bae6fd",
+              }}
+            >
+              ← ก่อน
+            </button>
+
+            {(() => {
+              const groupSize = 5;
+              const currentGroup = Math.floor((currentPage - 1) / groupSize);
+              const start = currentGroup * groupSize + 1;
+              const end = Math.min(start + groupSize - 1, totalPages);
+              return Array.from({ length: end - start + 1 }, (_, i) => start + i).map((i) => (
+                <button
+                  key={i}
+                  onClick={() => setCurrentPage(i)}
+                  className="px-3 py-1.5 rounded-lg text-sm font-medium"
+                  style={{
+                    background: currentPage === i
+                      ? "linear-gradient(135deg, #0e7490, #0f4c75)"
+                      : "#f3f4f6",
+                    color: currentPage === i ? "#fff" : "#6b7280",
+                    border: "1px solid #e5e7eb",
+                    boxShadow: currentPage === i ? "0 2px 8px rgba(14, 116, 144, 0.35)" : "none",
+                  }}
+                >
+                  {i}
+                </button>
+              ));
+            })()}
+
+            <button
+              onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+              disabled={currentPage === totalPages}
+              className="px-3 py-1.5 rounded-lg text-sm font-medium disabled:opacity-40"
+              style={{
+                background: "linear-gradient(135deg, #e0f2fe, #cffafe)",
+                color: "#0c4a6e",
+                border: "1px solid #bae6fd",
+              }}
+            >
+              ถัดไป →
+            </button>
+          </div>
         </div>
-        <button
-          onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
-          disabled={currentPage === totalPages}
-          className="px-3 py-1 bg-gray-200 rounded disabled:opacity-50 flex items-center justify-center"
-          aria-label="ถัดไป"
-        >
-          {/* chevron-right icon */}
-          <svg
-            className="w-4 h-4 text-gray-700"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            viewBox="0 0 24 24"
-          >
-            <path d="M9 5l7 7-7 7" />
-          </svg>
-        </button>
-      </div>
+      )}
     </div>
   );
 }
