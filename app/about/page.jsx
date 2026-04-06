@@ -71,7 +71,7 @@ export default function AboutPage() {
             </div>
             <h3 className={`text-xl font-bold mb-2 ${isDark ? 'text-slate-200' : 'text-gray-800'}`}>ข้อมูลส่วนตัว</h3>
             <p className={`leading-relaxed text-sm ${isDark ? 'text-slate-400' : 'text-gray-500'}`}>
-              ไร้กังวลเรื่องหลุดรอด ข้อมูลของคุณจะไม่ถูกส่งไปยังเซิร์ฟเวอร์ใดๆ แต่จัดเก็บใน Local Storage ของคุณเอง
+              ไร้กังวลเรื่องข้อมูลหลุด ข้อมูลของคุณจะไม่ถูกส่งไปยังเซิร์ฟเวอร์ใดๆ แต่จัดเก็บใน Local Storage ของคุณเอง
             </p>
           </div>
         </div>
