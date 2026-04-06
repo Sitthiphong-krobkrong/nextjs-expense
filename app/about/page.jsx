@@ -39,7 +39,7 @@ export default function AboutPage() {
                   <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
                </svg>
             </div>
-            <h3 className={`text-xl font-bold mb-2 ${isDark ? 'text-slate-200' : 'text-gray-800'}`}>ใช้งานง่ายดาย</h3>
+            <h3 className={`text-xl font-bold mb-2 ${isDark ? 'text-slate-200' : 'text-gray-800'}`}>ใช้งานง่าย</h3>
             <p className={`leading-relaxed text-sm ${isDark ? 'text-slate-400' : 'text-gray-500'}`}>
               บันทึกรายรับ-รายจ่ายได้ง่าย พร้อมฟีเจอร์เพิ่ม แก้ไข และลบรายการในคลิกเดียว จัดหมวดหมู่สีสันชัดเจน
             </p>
