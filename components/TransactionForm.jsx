@@ -86,7 +86,7 @@ export default function TransactionForm({ onSave, editing, onCancel }) {
       description,
       amount: parsedAmount,
       type,
-      date: new Date(`${date}T00:00:00`).toISOString(),
+      date: `${date}T00:00:00.000`,
     };
     onSave(tx);
     setDescription("");
@@ -204,7 +204,7 @@ export default function TransactionForm({ onSave, editing, onCancel }) {
           </button>
         </div>
 
-        <div className="grid sm:grid-cols-3 gap-5">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
             {/* Amount */}
             <div className="relative">
               <label className="block text-sm font-bold mb-1.5 ml-1 text-gray-700 dark:text-slate-300">{t("form_amount")}</label>
