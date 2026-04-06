@@ -109,62 +109,7 @@ const Navbar = () => {
             {lang === "th" ? "EN" : "TH"}
           </button>
 
-          {/* Hamburger — bottom nav handles mobile navigation */}
-          {isMobile && false && (
-          <>
-            <button
-              onClick={() => setShowMobileMenu((prev) => !prev)}
-              aria-label="Toggle navigation"
-              style={{
-                display: "flex", flexDirection: "column", justifyContent: "center",
-                alignItems: "center", width: "40px", height: "40px",
-                background: "rgba(255,255,255,0.1)", border: "1px solid rgba(255,255,255,0.2)",
-                cursor: "pointer", borderRadius: "8px", padding: 0, zIndex: 1100,
-              }}
-            >
-              {showMobileMenu ? (
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5">
-                  <path d="M18 6L6 18M6 6l12 12"/>
-                </svg>
-              ) : (
-                <>
-                  <span style={{ width: "18px", height: "2px", background: "#fff", margin: "2px 0", borderRadius: "2px", display: "block" }}></span>
-                  <span style={{ width: "18px", height: "2px", background: "#fff", margin: "2px 0", borderRadius: "2px", display: "block" }}></span>
-                  <span style={{ width: "18px", height: "2px", background: "#fff", margin: "2px 0", borderRadius: "2px", display: "block" }}></span>
-                </>
-              )}
-            </button>
-
-            {showMobileMenu && (
-              <ul style={{
-                position: "absolute", top: "64px", right: "16px",
-                background: "linear-gradient(135deg, #0f4c75, #1b6ca8)",
-                flexDirection: "column", gap: "0.25rem", padding: "0.75rem",
-                borderRadius: "12px", boxShadow: "0 8px 32px rgba(0,0,0,0.3)",
-                zIndex: 1000, listStyle: "none", display: "flex",
-                border: "1px solid rgba(255,255,255,0.15)", minWidth: "160px",
-              }}>
-                {navLinks.map(({ href, label }) => (
-                  <li key={href}>
-                    <Link
-                      href={href}
-                      onClick={() => setShowMobileMenu(false)}
-                      style={{
-                        color: pathname === href ? "#fff" : "rgba(255,255,255,0.75)",
-                        textDecoration: "none", fontSize: "0.95rem",
-                        padding: "0.6rem 1rem", borderRadius: "8px",
-                        background: pathname === href ? "rgba(255,255,255,0.15)" : "transparent",
-                        display: "block", fontWeight: pathname === href ? "600" : "400",
-                      }}
-                    >
-                      {label}
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            )}
-          </>
-        )}
+          {/* Hamburger removed — bottom nav handles mobile navigation */}
         </div>
       </div>
     </nav>
