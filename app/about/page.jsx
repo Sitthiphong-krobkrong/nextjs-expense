@@ -1,12 +1,14 @@
 "use client";
 import { useState, useEffect } from "react";
 import { useTheme } from "next-themes";
+import { useLang } from "../hooks/useLanguage";
 
 export default function AboutPage() {
   const { resolvedTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
   useEffect(() => setMounted(true), []);
   const isDark = mounted && resolvedTheme === "dark";
+  const { t } = useLang();
   return (
     <div className="min-h-screen py-12 px-4">
       <div className="max-w-4xl mx-auto">
@@ -24,10 +26,10 @@ export default function AboutPage() {
             WebkitTextFillColor: "transparent",
             backgroundClip: "text",
           }}>
-            เกี่ยวกับแอปพลิเคชัน
+            {t("about_title")}
           </h1>
           <p className={`text-lg max-w-2xl mx-auto ${isDark ? 'text-slate-400' : 'text-gray-500'}`}>
-            สร้างขึ้นเพื่อให้คุณสามารถจัดการข้อมูลรายรับราย-จ่ายได้อย่างสะดวก รวดเร็ว และปลอดภัยบนเบราว์เซอร์ของคุณ
+            {t("about_subtitle")}
           </p>
         </div>
 
@@ -39,9 +41,9 @@ export default function AboutPage() {
                   <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
                </svg>
             </div>
-            <h3 className={`text-xl font-bold mb-2 ${isDark ? 'text-slate-200' : 'text-gray-800'}`}>ใช้งานง่าย</h3>
+            <h3 className={`text-xl font-bold mb-2 ${isDark ? 'text-slate-200' : 'text-gray-800'}`}>{t("about_f1_title")}</h3>
             <p className={`leading-relaxed text-sm ${isDark ? 'text-slate-400' : 'text-gray-500'}`}>
-              บันทึกรายรับ-รายจ่ายได้ง่าย พร้อมฟีเจอร์เพิ่ม แก้ไข และลบรายการในคลิกเดียว จัดหมวดหมู่สีสันชัดเจน
+              {t("about_f1_desc")}
             </p>
           </div>
 
@@ -56,22 +58,22 @@ export default function AboutPage() {
                   <polyline points="10 9 9 9 8 9"></polyline>
                </svg>
             </div>
-            <h3 className={`text-xl font-bold mb-2 ${isDark ? 'text-slate-200' : 'text-gray-800'}`}>ส่งออกเอกสาร</h3>
+            <h3 className={`text-xl font-bold mb-2 ${isDark ? 'text-slate-200' : 'text-gray-800'}`}>{t("about_f2_title")}</h3>
             <p className={`leading-relaxed text-sm ${isDark ? 'text-slate-400' : 'text-gray-500'}`}>
-              รองรับการส่งออกข้อมูลทั้งหมดออกมาเป็นไฟล์ Excel เพื่อนำไปเปิดในโปรแกรมพื่อวิเคราะห์เชิงลึกได้ทันที
+              {t("about_f2_desc")}
             </p>
           </div>
 
           {/* Feature 3 */}
           <div className="glass-card p-6 rounded-3xl hover:-translate-y-1 transition-all duration-300">
-            <div className={`w-12 h-12 rounded-2xl flex items-center justify-center mb-4 shadow-inner ${isDark ? 'bg-purple-900/40 text-purple-400' : 'bg-gradient-to-br from-purple-100 to-fuchsia-100 text-purple-600'}`}>
+            <div className={`w-12 h-12 rounded-2xl flex items-center justify-center mb-4 shadow-inner ${isDark ? 'bg-cyan-900/40 text-cyan-400' : 'bg-gradient-to-br from-cyan-100 to-sky-100 text-cyan-600'}`}>
                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
                </svg>
             </div>
-            <h3 className={`text-xl font-bold mb-2 ${isDark ? 'text-slate-200' : 'text-gray-800'}`}>ข้อมูลส่วนตัว</h3>
+            <h3 className={`text-xl font-bold mb-2 ${isDark ? 'text-slate-200' : 'text-gray-800'}`}>{t("about_f3_title")}</h3>
             <p className={`leading-relaxed text-sm ${isDark ? 'text-slate-400' : 'text-gray-500'}`}>
-              ไร้กังวลเรื่องข้อมูลหลุด ข้อมูลของคุณจะไม่ถูกส่งไปยังเซิร์ฟเวอร์ใดๆ แต่จัดเก็บใน Local Storage ของคุณเอง
+              {t("about_f3_desc")}
             </p>
           </div>
         </div>
@@ -81,9 +83,9 @@ export default function AboutPage() {
           <div className="absolute top-0 right-0 -mr-16 -mt-16 w-64 h-64 rounded-full bg-slate-700/30 blur-3xl"></div>
           <div className="absolute bottom-0 left-0 -ml-16 -mb-16 w-64 h-64 rounded-full bg-cyan-700/20 blur-3xl"></div>
           <div className="relative z-10">
-            <h2 className="text-2xl font-bold mb-3">พบปัญหาหรือมีข้อเสนอแนะ?</h2>
+            <h2 className="text-2xl font-bold mb-3">{t("about_contact_title")}</h2>
             <p className="text-slate-300 mb-6 max-w-lg mx-auto">
-              เรารับฟังทุกความคิดเห็นเพื่อนำไปพัฒนาแอปพลิเคชันให้ดียิ่งขึ้น สามารถส่งอีเมลพูดคุยกับเราได้ตลอดเวลา
+              {t("about_contact_sub")}
             </p>
             <a 
               href="mailto:sitthiphong.krobkrong@gmail.com" 
@@ -93,7 +95,7 @@ export default function AboutPage() {
                 <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
                 <polyline points="22,6 12,13 2,6"></polyline>
               </svg>
-              ติดต่อผู้พัฒนา
+              {t("about_contact_btn")}
             </a>
           </div>
         </div>

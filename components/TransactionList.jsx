@@ -1,9 +1,11 @@
 import { useState } from "react";
+import { useLang } from "../app/hooks/useLanguage";
 
 export default function TransactionList({ items, onEdit, onDelete }) {
-  const PAGE_SIZE = 5;
+  const PAGE_SIZE = 10;
   const [currentPage, setCurrentPage] = useState(1);
-
+  const { t, lang } = useLang();
+  const locale = lang === "th" ? "th-TH" : "en-GB";
   const totalPages = Math.ceil(items.length / PAGE_SIZE);
   const sortedItems = [...items].sort((a, b) => new Date(b.date) - new Date(a.date));
   const pagedItems = sortedItems.slice(
@@ -27,7 +29,7 @@ export default function TransactionList({ items, onEdit, onDelete }) {
             </svg>
           </div>
           <div>
-            <h2 className="text-lg font-semibold text-sky-900 dark:text-slate-200">รายการทั้งหมด</h2>
+            <h2 className="text-lg font-semibold text-sky-900 dark:text-slate-200">{t("list_title")}</h2>
             <p className="text-xs text-cyan-700 dark:text-slate-400">{items.length} รายการ</p>
           </div>
         </div>
@@ -41,8 +43,8 @@ export default function TransactionList({ items, onEdit, onDelete }) {
             <rect x="9" y="3" width="6" height="4" rx="1"/>
             <path d="M9 12h6M9 16h4"/>
           </svg>
-          <p className="text-sm">ยังไม่มีรายการ</p>
-          <p className="text-xs mt-1">เพิ่มรายการแรกของคุณด้านบน</p>
+          <p className="text-sm">{t("list_empty")}</p>
+          <p className="text-xs mt-1">{t("list_empty_sub")}</p>
         </div>
       ) : (
         <>
@@ -75,10 +77,10 @@ export default function TransactionList({ items, onEdit, onDelete }) {
                     <p className="text-[15px] font-extrabold tracking-wide truncate text-slate-800 dark:text-white mb-1.5">{tx.description}</p>
                     <div className="flex items-center gap-2">
                       <span className={`px-2 py-0.5 rounded-lg text-[10px] font-black tracking-wider ${tx.type === "expense" ? "bg-rose-100/80 dark:bg-rose-500/20 text-rose-700 dark:text-rose-400" : "bg-emerald-100/80 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-400"}`}>
-                        {tx.type === "expense" ? "รายจ่าย" : "รายรับ"}
+                        {tx.type === "expense" ? t("list_expense_badge") : t("list_income_badge")}
                       </span>
                       <span className="text-[11px] font-semibold text-slate-500 dark:text-slate-400">
-                        {tx.date ? new Date(tx.date).toLocaleDateString("th-TH", { day: "2-digit", month: "short", year: "2-digit" }) : "-"}
+                        {tx.date ? new Date(tx.date).toLocaleDateString(locale, { day: "2-digit", month: "short", year: "2-digit" }) : "-"}
                       </span>
                     </div>
                   </div>
@@ -117,11 +119,11 @@ export default function TransactionList({ items, onEdit, onDelete }) {
             <table className="w-full border-separate border-spacing-y-3 mt-2">
               <thead>
                 <tr>
-                  <th className="px-5 py-3 text-[11px] font-black uppercase tracking-widest text-center w-24 text-slate-400">จัดการ</th>
-                  <th className="px-5 py-3 text-[11px] font-black uppercase tracking-widest text-right text-slate-400">จำนวนเงิน</th>
-                  <th className="px-5 py-3 text-[11px] font-black uppercase tracking-widest text-left text-slate-400">รายละเอียด</th>
-                  <th className="px-5 py-3 text-[11px] font-black uppercase tracking-widest text-center text-slate-400">ประเภท</th>
-                  <th className="px-5 py-3 text-[11px] font-black uppercase tracking-widest text-center text-slate-400">วันที่</th>
+                  <th className="px-5 py-3 text-[11px] font-black uppercase tracking-widest text-center w-24 text-slate-400">{t("list_manage")}</th>
+                  <th className="px-5 py-3 text-[11px] font-black uppercase tracking-widest text-right text-slate-400">{t("list_amount")}</th>
+                  <th className="px-5 py-3 text-[11px] font-black uppercase tracking-widest text-left text-slate-400">{t("list_detail")}</th>
+                  <th className="px-5 py-3 text-[11px] font-black uppercase tracking-widest text-center text-slate-400">{t("list_type")}</th>
+                  <th className="px-5 py-3 text-[11px] font-black uppercase tracking-widest text-center text-slate-400">{t("list_date")}</th>
                 </tr>
               </thead>
               <tbody>
@@ -175,12 +177,12 @@ export default function TransactionList({ items, onEdit, onDelete }) {
                     </td>
                     <td className="px-5 py-3.5 text-center border-y border-white/60 dark:border-white/[0.05] transition-colors">
                       <span className={`px-2.5 py-1 rounded-lg text-[11px] font-black tracking-wider ${tx.type === "expense" ? "bg-rose-100/80 dark:bg-rose-500/20 text-rose-700 dark:text-rose-400" : "bg-emerald-100/80 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-400"}`}>
-                        {tx.type === "expense" ? "รายจ่าย" : "รายรับ"}
+                        {tx.type === "expense" ? t("list_expense_badge") : t("list_income_badge")}
                       </span>
                     </td>
                     <td className="px-5 py-3.5 text-center first:rounded-l-3xl last:rounded-r-3xl border-y border-r border-white/60 dark:border-white/[0.05] transition-colors">
                       <span className="text-[13px] font-bold text-slate-400 dark:text-slate-500">
-                        {tx.date ? new Date(tx.date).toLocaleDateString("th-TH", { day: '2-digit', month: 'short', year: 'numeric' }) : "-"}
+                        {tx.date ? new Date(tx.date).toLocaleDateString(locale, { day: '2-digit', month: 'short', year: 'numeric' }) : "-"}
                       </span>
                     </td>
                   </tr>
@@ -195,7 +197,7 @@ export default function TransactionList({ items, onEdit, onDelete }) {
       {totalPages > 1 && (
         <div className="px-4 sm:px-5 py-4 border-t flex flex-col sm:flex-row items-center justify-between gap-3 sm:gap-4 border-gray-100 dark:border-slate-700/50">
           <p className="text-xs w-full sm:w-auto text-center sm:text-left text-gray-500 dark:text-slate-400">
-            หน้า {currentPage} จาก {totalPages}
+            {t("list_page")} {currentPage} {t("list_of")} {totalPages}
           </p>
           <div className="flex gap-1 sm:gap-1.5 flex-wrap sm:flex-nowrap justify-center">
             <button
@@ -203,7 +205,7 @@ export default function TransactionList({ items, onEdit, onDelete }) {
               disabled={currentPage === 1}
               className="px-2.5 sm:px-3 py-1.5 rounded-lg text-sm font-medium disabled:opacity-40 flex items-center justify-center min-w-[32px] sm:min-w-[auto] bg-sky-50 dark:bg-sky-900/20 text-sky-900 dark:text-sky-300 border border-sky-200 dark:border-sky-800/50"
             >
-              <span className="hidden sm:inline">← ก่อน</span>
+              <span className="hidden sm:inline">{t("list_prev")}</span>
               <span className="sm:hidden">←</span>
             </button>
 
@@ -233,7 +235,7 @@ export default function TransactionList({ items, onEdit, onDelete }) {
               disabled={currentPage === totalPages}
               className="px-2.5 sm:px-3 py-1.5 rounded-lg text-sm font-medium disabled:opacity-40 flex items-center justify-center min-w-[32px] sm:min-w-[auto] bg-sky-50 dark:bg-sky-900/20 text-sky-900 dark:text-sky-300 border border-sky-200 dark:border-sky-800/50"
             >
-              <span className="hidden sm:inline">ถัดไป →</span>
+              <span className="hidden sm:inline">{t("list_next")}</span>
               <span className="sm:hidden">→</span>
             </button>
           </div>

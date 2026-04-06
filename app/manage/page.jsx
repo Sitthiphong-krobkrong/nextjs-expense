@@ -4,12 +4,14 @@ import { useTheme } from "next-themes";
 import Swal from "sweetalert2";
 import { deleteAllTransactions } from "@/services/transactionService";
 import { exportExcelFromLocalStorage } from "@/services/manageService";
+import { useLang } from "../hooks/useLanguage";
 
 export default function ManagePage() {
     const { resolvedTheme } = useTheme();
     const [mounted, setMounted] = useState(false);
     useEffect(() => setMounted(true), []);
     const isDark = mounted && resolvedTheme === "dark";
+    const { t } = useLang();
 
     return (
         <div className="min-h-screen py-12 px-4">
@@ -27,9 +29,8 @@ export default function ManagePage() {
                         WebkitTextFillColor: "transparent",
                         backgroundClip: "text",
                     }}>
-                        จัดการข้อมูล
-                    </h1>
-                    <p className={`font-medium ${isDark ? 'text-slate-400' : 'text-gray-500'}`}>ตั้งค่าระบบและจัดการข้อมูลบัญชีของคุณ</p>
+                        {t("manage_title")}                    </h1>
+                    <p className={`font-medium ${isDark ? 'text-slate-400' : 'text-gray-500'}`}>{t("manage_subtitle")}</p>
                 </div>
 
                 <div className="glass-card rounded-3xl overflow-hidden p-6 sm:p-8 space-y-6 transition-colors duration-300">
@@ -45,35 +46,35 @@ export default function ManagePage() {
                                 </svg>
                             </div>
                             <div>
-                                <h3 className={`text-lg font-semibold ${isDark ? 'text-slate-200' : 'text-gray-800'}`}>ส่งออกข้อมูลเป็น Excel</h3>
-                                <p className={`text-sm ${isDark ? 'text-slate-400' : 'text-gray-500'}`}>บันทึกข้อมูลรายรับ-รายจ่ายทั้งหมดเก็บไว้สำรอง</p>
+                                <h3 className={`text-lg font-semibold ${isDark ? 'text-slate-200' : 'text-gray-800'}`}>{t("manage_export_title")}</h3>
+                                <p className={`text-sm ${isDark ? 'text-slate-400' : 'text-gray-500'}`}>{t("manage_export_sub")}</p>
                             </div>
                         </div>
                         <button
                             className="w-full sm:w-auto shrink-0 px-6 py-2.5 bg-gradient-to-r from-blue-500 to-blue-600 text-white font-medium rounded-xl hover:from-blue-600 hover:to-blue-700 shadow-lg shadow-blue-500/30 hover:shadow-blue-500/50 transition-all hover:-translate-y-0.5"
                             onClick={async () => {
                                 const result = await Swal.fire({
-                                    title: "ส่งออกข้อมูลเป็น Excel?",
-                                    text: "คุณต้องการส่งออกข้อมูล Transactions เป็นไฟล์ Excel หรือไม่?",
+                                    title: t("swal_export_title"),
+                                    text: t("swal_export_text"),
                                     icon: "question",
                                     showCancelButton: true,
-                                    confirmButtonText: "ใช่, ส่งออก",
-                                    cancelButtonText: "ยกเลิก",
+                                    confirmButtonText: t("swal_export_yes"),
+                                    cancelButtonText: t("swal_cancel"),
                                     confirmButtonColor: "#3b82f6",
                                 });
                                 if (result.isConfirmed) {
                                     try {
                                         await exportExcelFromLocalStorage();
-                                        Swal.fire("สำเร็จ!", "ข้อมูลถูกส่งออกเป็นไฟล์ Excel เรียบร้อยแล้ว", "success");
+                                        Swal.fire(t("swal_export_success"), t("swal_export_success_text"), "success");
                                     }
                                     catch (error) {
                                         console.error("Error exporting data:", error);
-                                        Swal.fire("เกิดข้อผิดพลาด!", "ไม่สามารถส่งออกข้อมูลได้", "error");
+                                        Swal.fire(t("swal_export_error"), t("swal_export_error_text"), "error");
                                     }
                                 }
                             }}
                         >
-                            ดาวน์โหลด
+                            {t("manage_export_btn")}
                         </button>
                     </div>
 
@@ -88,30 +89,30 @@ export default function ManagePage() {
                                 </svg>
                             </div>
                             <div>
-                                <h3 className={`text-lg font-semibold ${isDark ? 'text-slate-200' : 'text-gray-800'}`}>ลบข้อมูลทั้งหมด</h3>
-                                <p className={`text-sm ${isDark ? 'text-red-400' : 'text-red-400'}`}>ล้างข้อมูลทั้งหมดในระบบแบบถาวร</p>
+                                <h3 className={`text-lg font-semibold ${isDark ? 'text-slate-200' : 'text-gray-800'}`}>{t("manage_delete_title")}</h3>
+                                <p className={`text-sm ${isDark ? 'text-red-400' : 'text-red-400'}`}>{t("manage_delete_sub")}</p>
                             </div>
                         </div>
                         <button
                             className="w-full sm:w-auto shrink-0 px-6 py-2.5 bg-gradient-to-r from-red-500 to-red-600 text-white font-medium rounded-xl hover:from-red-600 hover:to-red-700 shadow-lg shadow-red-500/30 hover:shadow-red-500/50 transition-all hover:-translate-y-0.5"
                             onClick={async () => {
                                 const result = await Swal.fire({
-                                    title: "คุณแน่ใจหรือไม่?",
-                                    text: "ข้อมูลรายรับ-รายจ่ายทั้งหมดจะถูกลบและไม่สามารถกู้คืนได้!",
+                                    title: t("swal_delete_all_title"),
+                                    text: t("swal_delete_all_text"),
                                     icon: "warning",
                                     showCancelButton: true,
-                                    confirmButtonText: "ใช่, ลบทั้งหมด",
-                                    cancelButtonText: "ยกเลิก",
+                                    confirmButtonText: t("swal_delete_all_yes"),
+                                    cancelButtonText: t("swal_cancel"),
                                     confirmButtonColor: "#ef4444",
                                     cancelButtonColor: "#6b7280",
                                 });
                                 if (result.isConfirmed) {
                                     await deleteAllTransactions();
-                                    Swal.fire("ลบข้อมูล!", "ข้อมูลทั้งหมดถูกล้างเรียบร้อย", "success");
+                                    Swal.fire(t("swal_delete_all_done"), t("swal_delete_all_done_text"), "success");
                                 }
                             }}
                         >
-                            ล้างข้อมูล
+                            {t("manage_delete_btn")}
                         </button>
                     </div>
 

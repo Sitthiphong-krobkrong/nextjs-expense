@@ -2,18 +2,17 @@
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-
 import { ThemeToggle } from "@/components/ThemeToggle";
+import { useLang } from "@/app/hooks/useLanguage";
 
 const Navbar = () => {
   const [isMobile, setIsMobile] = useState(false);
-  const [showMobileMenu, setShowMobileMenu] = useState(false);
   const pathname = usePathname();
+  const { lang, setLang, t } = useLang();
 
   useEffect(() => {
     const handleResize = () => {
       setIsMobile(window.innerWidth <= 768);
-      if (window.innerWidth > 768) setShowMobileMenu(false);
     };
     handleResize();
     window.addEventListener("resize", handleResize);
@@ -21,9 +20,10 @@ const Navbar = () => {
   }, []);
 
   const navLinks = [
-    { href: "/", label: "หน้าหลัก" },
-    { href: "/manage", label: "จัดการข้อมูล" },
-    { href: "/about", label: "เกี่ยวกับ" },
+    { href: "/", label: t("nav_home") },
+    { href: "/calendar", label: t("nav_calendar") },
+    { href: "/manage", label: t("nav_manage") },
+    { href: "/about", label: t("nav_about") },
   ];
 
   return (
@@ -94,8 +94,23 @@ const Navbar = () => {
           {/* Theme Toggle */}
           <ThemeToggle />
 
-          {/* Hamburger */}
-          {isMobile && (
+          {/* Lang Toggle */}
+          <button
+            onClick={() => setLang(lang === "th" ? "en" : "th")}
+            style={{
+              display: "flex", alignItems: "center", justifyContent: "center",
+              width: "40px", height: "40px",
+              background: "rgba(255,255,255,0.1)", border: "1px solid rgba(255,255,255,0.2)",
+              cursor: "pointer", borderRadius: "8px", color: "#fff",
+              fontSize: "0.8rem", fontWeight: "700", letterSpacing: "0.05em",
+            }}
+            aria-label="Toggle language"
+          >
+            {lang === "th" ? "EN" : "TH"}
+          </button>
+
+          {/* Hamburger — bottom nav handles mobile navigation */}
+          {isMobile && false && (
           <>
             <button
               onClick={() => setShowMobileMenu((prev) => !prev)}

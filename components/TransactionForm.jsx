@@ -2,15 +2,21 @@
 import { useState, useEffect, useRef } from "react";
 import Swal from "sweetalert2";
 import useSpeechRecognition from "../app/hooks/useSpeechRecognition";
+import { useLang } from "../app/hooks/useLanguage";
 
 export default function TransactionForm({ onSave, editing, onCancel }) {
   const [description, setDescription] = useState("");
   const [amount, setAmount] = useState("");
   const [type, setType] = useState("expense");
+  const [date, setDate] = useState(() => {
+    const now = new Date();
+    return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
+  });
   const fileRef = useRef();
   const [loading, setLoading] = useState(false);
   const [showOverlay, setShowOverlay] = useState(false);
   const loadingTimeout = useRef();
+  const { t } = useLang();
 
   const { isListening, isSupported, error: speechError, startListening, stopListening } = useSpeechRecognition();
 
@@ -25,14 +31,14 @@ export default function TransactionForm({ onSave, editing, onCancel }) {
       setType(result.type);
       Swal.fire({
         icon: "success",
-        title: "รับเสียงสำเร็จ",
+        title: t("swal_voice_success"),
         html: `<div class="text-left text-sm">
-          <p><b>คำพูด:</b> ${result.transcript}</p>
-          <p><b>รายละเอียด:</b> ${result.description || "-"}</p>
-          <p><b>จำนวนเงิน:</b> ${result.amount || "-"}</p>
-          <p><b>ประเภท:</b> ${result.type === "income" ? "รายรับ" : "รายจ่าย"}</p>
+          <p><b>${t("swal_voice_transcript")}:</b> ${result.transcript}</p>
+          <p><b>${t("swal_voice_detail")}:</b> ${result.description || "-"}</p>
+          <p><b>${t("swal_voice_amount")}:</b> ${result.amount || "-"}</p>
+          <p><b>${t("swal_voice_type")}:</b> ${result.type === "income" ? t("swal_voice_income") : t("swal_voice_expense")}</p>
         </div>`,
-        confirmButtonText: "ตกลง",
+        confirmButtonText: t("swal_ok"),
       });
     });
   };
@@ -42,33 +48,36 @@ export default function TransactionForm({ onSave, editing, onCancel }) {
       setDescription(editing.description);
       setAmount(String(editing.amount));
       setType(editing.type);
+      setDate(editing.date ? editing.date.split("T")[0] : new Date().toISOString().split("T")[0]);
+    } else {
+      setDate(new Date().toLocaleDateString("en-CA"));
     }
   }, [editing]);
 
   async function handleSubmit(e) {
     e.preventDefault();
     const result = await Swal.fire({
-      title: "ยืนยันการบันทึกรายการ?",
+      title: t("swal_confirm_save_title"),
       icon: "question",
       showCancelButton: true,
-      confirmButtonText: "ใช่, บันทึก",
-      cancelButtonText: "ยกเลิก",
+      confirmButtonText: t("swal_confirm_save_yes"),
+      cancelButtonText: t("swal_cancel"),
       confirmButtonColor: "#0e7490",
       cancelButtonColor: "#6b7280",
     });
     if (!result.isConfirmed) return;
 
     if (!description.trim()) {
-      await Swal.fire({ icon: "error", title: "กรุณากรอกรายละเอียด", confirmButtonText: "ตกลง" });
+      await Swal.fire({ icon: "error", title: t("swal_error_desc"), confirmButtonText: t("swal_ok") });
       return;
     }
     const parsedAmount = parseFloat(amount);
     if (isNaN(parsedAmount) || parsedAmount <= 0) {
-      await Swal.fire({ icon: "error", title: "จำนวนเงินต้องเป็นตัวเลขมากกว่า 0", confirmButtonText: "ตกลง" });
+      await Swal.fire({ icon: "error", title: t("swal_error_amount"), confirmButtonText: t("swal_ok") });
       return;
     }
     if (type !== "income" && type !== "expense") {
-      await Swal.fire({ icon: "error", title: "ประเภทไม่ถูกต้อง", confirmButtonText: "ตกลง" });
+      await Swal.fire({ icon: "error", title: t("swal_error_type"), confirmButtonText: t("swal_ok") });
       return;
     }
 
@@ -77,17 +86,18 @@ export default function TransactionForm({ onSave, editing, onCancel }) {
       description,
       amount: parsedAmount,
       type,
-      date: new Date().toISOString(),
+      date: new Date(`${date}T00:00:00`).toISOString(),
     };
     onSave(tx);
     setDescription("");
     setAmount("");
     setType("expense");
+    setDate(new Date().toISOString().split("T")[0]);
 
     await Swal.fire({
       icon: "success",
-      title: "บันทึกรายการเรียบร้อย",
-      confirmButtonText: "ตกลง",
+      title: t("swal_saved_title"),
+      confirmButtonText: t("swal_ok"),
       confirmButtonColor: "#0e7490",
     });
   }
@@ -120,8 +130,7 @@ export default function TransactionForm({ onSave, editing, onCancel }) {
               </svg>
             </div>
           )}
-          {editing ? "แก้ไขรายการเงิน" : "เพิ่มรายการใหม่"}
-        </h2>
+          {editing ? t("form_edit") : t("form_add")}        </h2>
       </div>
 
       <div className="p-6 sm:p-7 space-y-6 relative z-10">
@@ -145,11 +154,11 @@ export default function TransactionForm({ onSave, editing, onCancel }) {
                 <path d="M12 1a3 3 0 00-3 3v8a3 3 0 006 0V4a3 3 0 00-3-3z"/>
                 <path d="M19 10v2a7 7 0 01-14 0v-2M12 19v4M8 23h8"/>
               </svg>
-              {isListening ? "กำลังฟังคำสั่งของคุณ..." : "ใช้งานด้วยคำสั่งเสียง"}
+              {isListening ? t("form_voice_listening") : t("form_voice")}
             </button>
             {isListening && (
               <p className="text-sm text-red-500 font-medium text-center animate-pulse">
-                พูดว่า &quot;กินข้าว 50 บาท&quot; หรือ &quot;รับเงินเดือน 30000 บาท&quot;
+                {t("form_voice_hint")}
               </p>
             )}
             {speechError && <p className="text-sm text-red-500 text-center">{speechError}</p>}
@@ -164,7 +173,7 @@ export default function TransactionForm({ onSave, editing, onCancel }) {
                  <circle className="opacity-25" cx="25" cy="25" r="20" fill="none" stroke="currentColor" strokeWidth="4"/>
                  <path className="opacity-75" fill="currentColor" d="M25 5a20 20 0 0 1 20 20h-4a16 16 0 1 0-16 16V5z"/>
                </svg>
-               <div className="text-base font-bold text-center text-gray-800 dark:text-slate-200">กำลังประมวลผล...</div>
+               <div className="text-base font-bold text-center text-gray-800 dark:text-slate-200">{t("form_processing")}</div>
             </div>
           </div>
         )}
@@ -180,7 +189,7 @@ export default function TransactionForm({ onSave, editing, onCancel }) {
               : "bg-white/50 dark:bg-black/20 border-transparent dark:border-white/5 text-gray-500 dark:text-slate-400"
             }`}
           >
-            + รายรับ
+            {t("form_income")}
           </button>
           <button
             type="button"
@@ -191,14 +200,14 @@ export default function TransactionForm({ onSave, editing, onCancel }) {
               : "bg-white/50 dark:bg-black/20 border-transparent dark:border-white/5 text-gray-500 dark:text-slate-400"
             }`}
           >
-            - รายจ่าย
+            {t("form_expense")}
           </button>
         </div>
 
-        <div className="grid sm:grid-cols-2 gap-5">
+        <div className="grid sm:grid-cols-3 gap-5">
             {/* Amount */}
             <div className="relative">
-              <label className="block text-sm font-bold mb-1.5 ml-1 text-gray-700 dark:text-slate-300">จำนวนเงิน (฿)</label>
+              <label className="block text-sm font-bold mb-1.5 ml-1 text-gray-700 dark:text-slate-300">{t("form_amount")}</label>
               <div className="relative">
                 <input
                   type="number"
@@ -224,15 +233,25 @@ export default function TransactionForm({ onSave, editing, onCancel }) {
               </div>
             </div>
 
+            {/* Date */}
+            <div className="relative">
+              <label className="block text-sm font-bold mb-1.5 ml-1 text-gray-700 dark:text-slate-300">{t("form_date")}</label>
+              <input
+                type="date"
+                value={date}
+                onChange={(e) => setDate(e.target.value)}
+                className={inputClass}
+              />
+            </div>
+
             {/* Description */}
             <div className="relative">
-              <label className="block text-sm font-bold mb-1.5 ml-1 text-gray-700 dark:text-slate-300">รายละเอียดรายการ</label>
-              <div className="relative">
+              <label className="block text-sm font-bold mb-1.5 ml-1 text-gray-700 dark:text-slate-300">{t("form_description")}</label>              <div className="relative">
                 <input
                   type="text"
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
-                  placeholder="เช่น ค่าข้าว, ค่าน้ำมัน..."
+                  placeholder={t("form_description_placeholder")}
                   className={`${inputClass} ${description ? "pr-12" : ""}`}
                 />
                 {description && (
@@ -267,14 +286,14 @@ export default function TransactionForm({ onSave, editing, onCancel }) {
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
                   <path d="M5 13l4 4L19 7"/>
                 </svg>
-                บันทึกการแก้ไข
+                {t("form_save_edit")}
               </>
             ) : (
               <>
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
                   <path d="M12 5v14M5 12h14"/>
                 </svg>
-                บันทึกรายการ
+                {t("form_save")}
               </>
             )}
           </button>
@@ -288,7 +307,7 @@ export default function TransactionForm({ onSave, editing, onCancel }) {
                 <line x1="18" y1="6" x2="6" y2="18"></line>
                 <line x1="6" y1="6" x2="18" y2="18"></line>
               </svg>
-              ยกเลิก
+              {t("form_cancel")}
             </button>
           )}
         </div>

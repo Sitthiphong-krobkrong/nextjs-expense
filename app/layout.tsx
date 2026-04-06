@@ -18,6 +18,8 @@ export const metadata: Metadata = {
 };
 
 import { ThemeProvider } from "@/components/ThemeProvider";
+import BottomNav from "@/components/BottomNav";
+import LangProvider from "@/components/LangProvider";
 
 export default function RootLayout({
   children,
@@ -28,9 +30,14 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <body className={kanit.className}>
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
-          <Navbar />
-          <DelayedLoader>{children}</DelayedLoader>
-          <Footer />
+          <LangProvider>
+            <Navbar />
+            <div className="pb-16 sm:pb-0">
+              <DelayedLoader>{children}</DelayedLoader>
+            </div>
+            <Footer />
+            <BottomNav />
+          </LangProvider>
         </ThemeProvider>
       </body>
     </html>
