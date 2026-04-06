@@ -48,7 +48,7 @@ export default function TransactionForm({ onSave, editing, onCancel }) {
       setDescription(editing.description);
       setAmount(String(editing.amount));
       setType(editing.type);
-      setDate(editing.date ? editing.date.split("T")[0] : new Date().toISOString().split("T")[0]);
+      setDate(editing.date ? editing.date.split("T")[0] : new Date().toLocaleDateString("en-CA"));
     } else {
       setDate(new Date().toLocaleDateString("en-CA"));
     }
@@ -92,7 +92,7 @@ export default function TransactionForm({ onSave, editing, onCancel }) {
     setDescription("");
     setAmount("");
     setType("expense");
-    setDate(new Date().toISOString().split("T")[0]);
+    setDate(new Date().toLocaleDateString("en-CA"));
 
     await Swal.fire({
       icon: "success",
@@ -240,7 +240,7 @@ export default function TransactionForm({ onSave, editing, onCancel }) {
                 type="date"
                 value={date}
                 onChange={(e) => setDate(e.target.value)}
-                className={inputClass}
+                className={`${inputClass} appearance-none w-full min-w-0`}
               />
             </div>
 

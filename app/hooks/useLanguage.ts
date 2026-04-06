@@ -1,5 +1,5 @@
 "use client";
-import { createContext, useContext, useState, useEffect, useCallback } from "react";
+import { createContext, useContext, useState, useEffect } from "react";
 import { translations, Lang, TranslationKey } from "../../lib/i18n";
 
 interface LangContextType {
@@ -19,19 +19,19 @@ export function useLangState() {
   const [lang, setLangState] = useState<Lang>("th");
 
   useEffect(() => {
-    const saved = localStorage.getItem("lang") as Lang;
-    if (saved === "th" || saved === "en") setLangState(saved);
+    try {
+      const saved = localStorage.getItem("lang") as Lang;
+      if (saved === "th" || saved === "en") setLangState(saved);
+    } catch {}
   }, []);
 
-  const setLang = useCallback((l: Lang) => {
+  const setLang = (l: Lang) => {
     setLangState(l);
-    localStorage.setItem("lang", l);
-  }, []);
+    try { localStorage.setItem("lang", l); } catch {}
+  };
 
-  const t = useCallback(
-    (key: TranslationKey): string => translations[lang][key] ?? key,
-    [lang]
-  );
+  // ไม่ใช้ useCallback เพื่อให้ t() อ่าน lang ล่าสุดเสมอ
+  const t = (key: TranslationKey): string => translations[lang][key] ?? key;
 
   return { lang, setLang, t };
 }
