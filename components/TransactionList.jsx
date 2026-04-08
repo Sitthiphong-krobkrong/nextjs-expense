@@ -7,7 +7,7 @@ export default function TransactionList({ items, onEdit, onDelete }) {
   const { t, lang } = useLang();
   const locale = lang === "th" ? "th-TH" : "en-GB";
   const totalPages = Math.ceil(items.length / PAGE_SIZE);
-  const sortedItems = [...items].sort((a, b) => new Date(b.date) - new Date(a.date));
+  const sortedItems = [...items].sort((a, b) => b.id - a.id);
   const pagedItems = sortedItems.slice(
     (currentPage - 1) * PAGE_SIZE,
     currentPage * PAGE_SIZE
