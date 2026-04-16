@@ -5,10 +5,15 @@ export const translations = {
     nav_calendar: "ปฏิทิน",
     nav_manage: "จัดการข้อมูล",
     nav_about: "เกี่ยวกับ",
+    nav_add: "เพิ่มรายการ",
 
     // Home page
     page_title: "ภาพรวมการเงิน",
     page_subtitle: "จัดการรายรับและรายจ่ายของคุณได้อย่างง่ายดาย",
+    add_page_title: "เพิ่มรายการ",
+    add_page_subtitle: "บันทึกรายรับหรือรายจ่ายของคุณ",
+    edit_page_title: "แก้ไขรายการ",
+    edit_page_subtitle: "แก้ไขข้อมูลรายรับหรือรายจ่ายของคุณ",
 
     // Calendar page
     calendar_title: "ปฏิทินการเงิน",
@@ -136,10 +141,15 @@ export const translations = {
     nav_calendar: "Calendar",
     nav_manage: "Manage",
     nav_about: "About",
+    nav_add: "Add",
 
     // Home page
     page_title: "Financial Overview",
     page_subtitle: "Manage your income and expenses with ease",
+    add_page_title: "Add Transaction",
+    add_page_subtitle: "Record your income or expense",
+    edit_page_title: "Edit Transaction",
+    edit_page_subtitle: "Update your income or expense record",
 
     // Calendar page
     calendar_title: "Financial Calendar",

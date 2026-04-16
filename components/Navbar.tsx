@@ -21,6 +21,7 @@ const Navbar = () => {
 
   const navLinks = [
     { href: "/", label: t("nav_home") },
+    { href: "/add", label: t("nav_add") },
     { href: "/calendar", label: t("nav_calendar") },
     { href: "/manage", label: t("nav_manage") },
     { href: "/about", label: t("nav_about") },
