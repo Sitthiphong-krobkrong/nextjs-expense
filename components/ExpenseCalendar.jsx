@@ -478,9 +478,16 @@ export default function ExpenseCalendar({ transactions }) {
                         </div>
                         <div className="flex-1 min-w-0">
                           <p className="text-sm font-bold text-slate-800 dark:text-slate-200 truncate">{tx.description}</p>
-                          <p className="text-xs text-slate-400 dark:text-slate-500 mt-0.5">
-                            {new Date(tx.date).toLocaleDateString(locale, { weekday: "short", day: "numeric", month: "short" })}
-                          </p>
+                          <div className="flex items-center gap-1.5 mt-0.5">
+                            <p className="text-xs text-slate-400 dark:text-slate-500">
+                              {new Date(tx.date).toLocaleDateString(locale, { weekday: "short", day: "numeric", month: "short" })}
+                            </p>
+                            {tx.isFixed && (
+                              <span className="text-[9px] font-black tracking-wider px-1.5 py-0.5 rounded-md bg-amber-100/80 dark:bg-amber-500/20 text-amber-700 dark:text-amber-400">
+                                {tx.type === "expense" ? t("list_fixed_expense_badge") : t("list_fixed_income_badge")}
+                              </span>
+                            )}
+                          </div>
                         </div>
                         <span className={`text-sm font-extrabold shrink-0 ${tx.type === "expense" ? "text-rose-600 dark:text-rose-400" : "text-emerald-600 dark:text-emerald-400"}`}>
                           {tx.type === "expense" ? "-" : "+"}{tx.amount.toLocaleString()} ฿
@@ -570,9 +577,16 @@ export default function ExpenseCalendar({ transactions }) {
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-bold text-slate-800 dark:text-slate-200 truncate">{tx.description}</p>
-                    <p className="text-xs text-slate-400 dark:text-slate-500 mt-0.5">
-                      {new Date(tx.date).toLocaleTimeString("th-TH", { hour: "2-digit", minute: "2-digit" })} น.
-                    </p>
+                    <div className="flex items-center gap-1.5 mt-0.5">
+                      <p className="text-xs text-slate-400 dark:text-slate-500">
+                        {new Date(tx.date).toLocaleTimeString("th-TH", { hour: "2-digit", minute: "2-digit" })} น.
+                      </p>
+                      {tx.isFixed && (
+                        <span className="text-[9px] font-black tracking-wider px-1.5 py-0.5 rounded-md bg-amber-100/80 dark:bg-amber-500/20 text-amber-700 dark:text-amber-400">
+                          {tx.type === "expense" ? t("list_fixed_expense_badge") : t("list_fixed_income_badge")}
+                        </span>
+                      )}
+                    </div>
                   </div>
                   <span
                     className={`text-base font-extrabold shrink-0 ${tx.type === "expense"

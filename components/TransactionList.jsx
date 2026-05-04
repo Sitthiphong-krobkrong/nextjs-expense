@@ -126,9 +126,16 @@ export default function TransactionList({ items, onEdit, onDelete }) {
                         {/* Info */}
                         <div className="flex-1 min-w-0">
                           <p className="text-[14px] font-extrabold truncate text-slate-800 dark:text-white">{tx.description}</p>
-                          <span className={`text-[10px] font-black tracking-wider px-1.5 py-0.5 rounded-md ${tx.type === "expense" ? "bg-rose-100/80 dark:bg-rose-500/20 text-rose-700 dark:text-rose-400" : "bg-emerald-100/80 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-400"}`}>
-                            {tx.type === "expense" ? t("list_expense_badge") : t("list_income_badge")}
-                          </span>
+                          <div className="flex items-center gap-1.5 flex-wrap">
+                            <span className={`text-[10px] font-black tracking-wider px-1.5 py-0.5 rounded-md ${tx.type === "expense" ? "bg-rose-100/80 dark:bg-rose-500/20 text-rose-700 dark:text-rose-400" : "bg-emerald-100/80 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-400"}`}>
+                              {tx.type === "expense" ? t("list_expense_badge") : t("list_income_badge")}
+                            </span>
+                            {tx.isFixed && (
+                              <span className="text-[10px] font-black tracking-wider px-1.5 py-0.5 rounded-md bg-amber-100/80 dark:bg-amber-500/20 text-amber-700 dark:text-amber-400">
+                                {tx.type === "expense" ? t("list_fixed_expense_badge") : t("list_fixed_income_badge")}
+                              </span>
+                            )}
+                          </div>
                         </div>
 
                         {/* Amount & Actions */}
@@ -223,9 +230,16 @@ export default function TransactionList({ items, onEdit, onDelete }) {
                             </div>
                           </td>
                           <td className="px-5 py-3 text-center first:rounded-l-2xl last:rounded-r-2xl border-y border-r border-white/60 dark:border-white/[0.05]">
-                            <span className={`px-2.5 py-1 rounded-lg text-[11px] font-black tracking-wider ${tx.type === "expense" ? "bg-rose-100/80 dark:bg-rose-500/20 text-rose-700 dark:text-rose-400" : "bg-emerald-100/80 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-400"}`}>
-                              {tx.type === "expense" ? t("list_expense_badge") : t("list_income_badge")}
-                            </span>
+                            <div className="flex flex-col items-center gap-1">
+                              <span className={`px-2.5 py-1 rounded-lg text-[11px] font-black tracking-wider ${tx.type === "expense" ? "bg-rose-100/80 dark:bg-rose-500/20 text-rose-700 dark:text-rose-400" : "bg-emerald-100/80 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-400"}`}>
+                                {tx.type === "expense" ? t("list_expense_badge") : t("list_income_badge")}
+                              </span>
+                              {tx.isFixed && (
+                                <span className="px-2.5 py-1 rounded-lg text-[11px] font-black tracking-wider bg-amber-100/80 dark:bg-amber-500/20 text-amber-700 dark:text-amber-400">
+                                  {tx.type === "expense" ? t("list_fixed_expense_badge") : t("list_fixed_income_badge")}
+                                </span>
+                              )}
+                            </div>
                           </td>
                         </tr>
                       ))}

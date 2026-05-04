@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import {
   loadTransactions,
   addTransactionsBatch,
@@ -17,6 +17,7 @@ export default function TransactionsPage() {
   const [transactions, setTransactions] = useState(() => loadTransactions());
   const { t } = useLang();
   const router = useRouter();
+  const fixedCostApplied = useRef(false);
 
   // Re-read localStorage on mount and when transactions change in another page
   useEffect(() => {
@@ -29,6 +30,10 @@ export default function TransactionsPage() {
   }, []);
 
   useEffect(() => {
+    // ป้องกัน Strict Mode รันซ้ำ → Swal กระพริบ
+    if (fixedCostApplied.current) return;
+    fixedCostApplied.current = true;
+
     const fixedCosts = loadFixedCosts();
     if (!fixedCosts.length) return;
     const { applied } = applyDueFixedCosts(fixedCosts);

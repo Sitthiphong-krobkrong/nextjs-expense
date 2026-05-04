@@ -6,7 +6,9 @@ import {
   updateFixedCost,
   deleteFixedCost,
   toggleFixedCost,
+  applyDueFixedCosts,
 } from "../services/fixedCostService";
+import { loadTransactions, addTransactionsBatch } from "../services/transactionService";
 import Swal from "sweetalert2";
 import { useLang } from "../app/hooks/useLanguage";
 
@@ -42,6 +44,8 @@ export default function FixedCostManager() {
       dayOfMonth: fc.dayOfMonth,
       startDate: fc.startDate,
       isActive: fc.isActive,
+      lastApplied: fc.lastApplied,
+      createdAt: fc.createdAt,
     });
     setEditingId(fc.id);
     setShowForm(true);
@@ -64,6 +68,13 @@ export default function FixedCostManager() {
       return;
     }
 
+    // ตรวจสอบ startDate — ป้องกันปี 2 หลัก (เช่น 69 → 0069)
+    const startYear = new Date(form.startDate).getFullYear();
+    if (!form.startDate || startYear < 1900 || startYear > 2200) {
+      Swal.fire({ icon: "warning", title: t("swal_error_date"), confirmButtonText: t("swal_ok") });
+      return;
+    }
+
     const { isConfirmed } = await Swal.fire({
       title: t("swal_confirm_save_title"),
       icon: "question",
@@ -76,18 +87,40 @@ export default function FixedCostManager() {
     if (!isConfirmed) return;
 
     const payload = { ...form, amount, dayOfMonth: Number(form.dayOfMonth) };
+    let updatedList;
     if (editingId) {
-      setFixedCosts(updateFixedCost({ ...payload, id: editingId }, fixedCosts));
+      updatedList = updateFixedCost({ ...payload, id: editingId }, fixedCosts);
     } else {
-      setFixedCosts(addFixedCost(payload, fixedCosts));
+      updatedList = addFixedCost(payload, fixedCosts);
     }
+
+    // Apply ทันทีหลัง save — ไม่ต้องรอกลับหน้าหลัก
+    const { applied, updatedFixedCosts } = applyDueFixedCosts(updatedList);
+    setFixedCosts(updatedFixedCosts);
+
+    if (applied.length > 0) {
+      addTransactionsBatch(applied, loadTransactions());
+      window.dispatchEvent(new Event("transactions-updated"));
+    }
+
     handleCancel();
-    Swal.fire({
-      icon: "success",
-      title: t("swal_saved_title"),
-      timer: 1500,
-      showConfirmButton: false,
-    });
+
+    if (applied.length > 0) {
+      Swal.fire({
+        icon: "success",
+        title: t("swal_saved_title"),
+        text: `${applied.length} ${t("swal_fixed_applied_text")}`,
+        timer: 2000,
+        showConfirmButton: false,
+      });
+    } else {
+      Swal.fire({
+        icon: "success",
+        title: t("swal_saved_title"),
+        timer: 1500,
+        showConfirmButton: false,
+      });
+    }
   };
 
   const handleDelete = async (id) => {

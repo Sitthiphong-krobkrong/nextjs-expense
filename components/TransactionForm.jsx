@@ -81,6 +81,13 @@ export default function TransactionForm({ onSave, editing, onCancel }) {
       return;
     }
 
+    // ตรวจสอบวันที่ — ป้องกันปี 2 หลัก (เช่น 69 → 0069)
+    const dateYear = new Date(date).getFullYear();
+    if (!date || dateYear < 1900 || dateYear > 2200) {
+      await Swal.fire({ icon: "error", title: t("swal_error_date"), confirmButtonText: t("swal_ok") });
+      return;
+    }
+
     const tx = {
       id: editing ? editing.id : Date.now(),
       description,
