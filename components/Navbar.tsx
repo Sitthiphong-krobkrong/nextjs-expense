@@ -29,8 +29,8 @@ const Navbar = () => {
 
   return (
     <nav className="relative z-50 transition-colors duration-300" style={{
-      background: "linear-gradient(135deg, #0f4c75 0%, #1b6ca8 50%, #0e7490 100%)",
-      boxShadow: "0 4px 20px rgba(15, 76, 117, 0.4)",
+      background: "linear-gradient(135deg, #065f46 0%, #047857 50%, #059669 100%)",
+      boxShadow: "0 4px 20px rgba(6, 95, 70, 0.4)",
     }}>
       <div style={{ maxWidth: "1200px", margin: "0 auto", padding: "0 1.5rem", display: "flex", justifyContent: "space-between", alignItems: "center", height: "64px" }}>
         {/* Logo */}
@@ -38,9 +38,9 @@ const Navbar = () => {
           <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
             <div style={{
               width: "36px", height: "36px", borderRadius: "10px",
-              background: "linear-gradient(135deg, #38bdf8, #06b6d4)",
+              background: "linear-gradient(135deg, #34d399, #10b981)",
               display: "flex", alignItems: "center", justifyContent: "center",
-              boxShadow: "0 2px 8px rgba(56, 189, 248, 0.5)",
+              boxShadow: "0 2px 8px rgba(52, 211, 153, 0.5)",
             }}>
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5">
                 <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z"/>

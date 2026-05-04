@@ -3,7 +3,7 @@ import React, { useState, useEffect } from "react";
 import { useTheme } from "next-themes";
 import Swal from "sweetalert2";
 import { deleteAllTransactions } from "@/services/transactionService";
-import { exportExcelFromLocalStorage } from "@/services/manageService";
+import { exportExcelFromLocalStorage, importExcelToLocalStorage } from "@/services/manageService";
 import { useLang } from "../hooks/useLanguage";
 
 export default function ManagePage() {
@@ -17,14 +17,14 @@ export default function ManagePage() {
         <div className="min-h-screen py-12 px-4">
             <div className="max-w-2xl mx-auto">
                 <div className="text-center mb-10 pt-4 relative z-10">
-                    <div className={`inline-flex items-center justify-center p-3 rounded-2xl mb-4 shadow-sm border transition-colors ${isDark ? 'bg-slate-800/80 text-cyan-400 border-slate-700/50' : 'bg-gradient-to-br from-cyan-50 to-blue-50 text-cyan-600 border-cyan-100/50'}`}>
+                    <div className={`inline-flex items-center justify-center p-3 rounded-2xl mb-4 shadow-sm border transition-colors ${isDark ? 'bg-slate-800/80 text-emerald-400 border-slate-700/50' : 'bg-gradient-to-br from-emerald-50 to-green-50 text-emerald-600 border-emerald-100/50'}`}>
                         <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                             <path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"></path>
                             <circle cx="12" cy="12" r="3"></circle>
                         </svg>
                     </div>
                     <h1 className="text-4xl sm:text-5xl font-extrabold mb-3 tracking-tight" style={{
-                        background: isDark ? "linear-gradient(135deg, #38bdf8, #818cf8)" : "linear-gradient(135deg, #0e7490, #0f4c75)",
+                        background: isDark ? "linear-gradient(135deg, #34d399, #6ee7b7)" : "linear-gradient(135deg, #059669, #065f46)",
                         WebkitBackgroundClip: "text",
                         WebkitTextFillColor: "transparent",
                         backgroundClip: "text",
@@ -76,6 +76,62 @@ export default function ManagePage() {
                         >
                             {t("manage_export_btn")}
                         </button>
+                    </div>
+
+                    {/* Import Section */}
+                    <div className={`flex flex-col sm:flex-row items-start sm:items-center justify-between p-5 rounded-2xl border gap-5 hover:shadow-md transition-shadow ${isDark ? 'bg-emerald-900/20 border-emerald-900/50' : 'bg-emerald-50/30 border-emerald-50'}`}>
+                        <div className="flex items-center gap-4">
+                            <div className={`p-3 rounded-xl shrink-0 ${isDark ? 'bg-emerald-900/50 text-emerald-400' : 'bg-emerald-100/80 text-emerald-600'}`}>
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                                    <polyline points="17 8 12 3 7 8"></polyline>
+                                    <line x1="12" y1="3" x2="12" y2="15"></line>
+                                </svg>
+                            </div>
+                            <div>
+                                <h3 className={`text-lg font-semibold ${isDark ? 'text-slate-200' : 'text-gray-800'}`}>{t("manage_import_title")}</h3>
+                                <p className={`text-sm ${isDark ? 'text-slate-400' : 'text-gray-500'}`}>{t("manage_import_sub")}</p>
+                            </div>
+                        </div>
+                        <label className="w-full sm:w-auto shrink-0 cursor-pointer">
+                            <input
+                                type="file"
+                                accept=".xlsx,.xls"
+                                className="hidden"
+                                onChange={async (e) => {
+                                    const file = e.target.files?.[0];
+                                    e.target.value = "";
+                                    if (!file) return;
+
+                                    const result = await Swal.fire({
+                                        title: t("swal_import_title"),
+                                        text: t("swal_import_text"),
+                                        icon: "question",
+                                        showCancelButton: true,
+                                        confirmButtonText: t("swal_import_yes"),
+                                        cancelButtonText: t("swal_cancel"),
+                                        confirmButtonColor: "#10b981",
+                                    });
+                                    if (!result.isConfirmed) return;
+
+                                    try {
+                                        const { count } = await importExcelToLocalStorage(file);
+                                        await Swal.fire(
+                                            t("swal_import_success"),
+                                            t("swal_import_success_text").replace("{count}", count),
+                                            "success"
+                                        );
+                                        window.location.reload();
+                                    } catch (error) {
+                                        console.error("Error importing data:", error);
+                                        Swal.fire(t("swal_import_error"), t("swal_import_error_text"), "error");
+                                    }
+                                }}
+                            />
+                            <span className="block text-center w-full sm:w-auto px-6 py-2.5 bg-gradient-to-r from-emerald-500 to-emerald-600 text-white font-medium rounded-xl hover:from-emerald-600 hover:to-emerald-700 shadow-lg shadow-emerald-500/30 hover:shadow-emerald-500/50 transition-all hover:-translate-y-0.5">
+                                {t("manage_import_btn")}
+                            </span>
+                        </label>
                     </div>
 
                     {/* Delete Section */}

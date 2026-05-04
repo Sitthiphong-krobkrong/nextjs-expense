@@ -3,6 +3,7 @@ const STORAGE_KEY = 'transactions';
 
 // โหลดจาก storage
 export function loadTransactions() {
+  if (typeof window === 'undefined') return [];
   const data = localStorage.getItem(STORAGE_KEY);
   try {
     return data ? JSON.parse(data) : [];
@@ -34,6 +35,15 @@ export function updateTransaction(tx, list) {
 // ลบรายการ
 export function deleteTransaction(id, list) {
   const updated = list.filter((t) => t.id !== id);
+  persist(updated);
+  return updated;
+}
+
+// เพิ่มหลายรายการพร้อมกัน (id ไม่ซ้ำกัน)
+export function addTransactionsBatch(txs, list) {
+  const base = Date.now();
+  const withIds = txs.map((tx, i) => ({ ...tx, id: base + i }));
+  const updated = [...list, ...withIds];
   persist(updated);
   return updated;
 }

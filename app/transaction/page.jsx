@@ -1,9 +1,11 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   loadTransactions,
+  addTransactionsBatch,
   deleteTransaction,
 } from "../../services/transactionService";
+import { loadFixedCosts, applyDueFixedCosts } from "../../services/fixedCostService";
 import TransactionList from "../../components/TransactionList";
 import Dashboard from "../../components/Dashboard";
 import Swal from "sweetalert2";
@@ -15,6 +17,34 @@ export default function TransactionsPage() {
   const [transactions, setTransactions] = useState(() => loadTransactions());
   const { t } = useLang();
   const router = useRouter();
+
+  // Re-read localStorage on mount and when transactions change in another page
+  useEffect(() => {
+    const refresh = () => setTransactions(loadTransactions());
+    // Listen for custom event dispatched after saving in /add page
+    window.addEventListener("transactions-updated", refresh);
+    // Also refresh on mount
+    refresh();
+    return () => window.removeEventListener("transactions-updated", refresh);
+  }, []);
+
+  useEffect(() => {
+    const fixedCosts = loadFixedCosts();
+    if (!fixedCosts.length) return;
+    const { applied } = applyDueFixedCosts(fixedCosts);
+    if (!applied.length) return;
+
+    const list = addTransactionsBatch(applied, loadTransactions());
+    setTransactions(list);
+
+    Swal.fire({
+      title: t("swal_fixed_applied_title"),
+      text: `${applied.length} ${t("swal_fixed_applied_text")}`,
+      icon: "info",
+      timer: 2500,
+      showConfirmButton: false,
+    });
+  }, []);
 
   const handleDelete = async (id) => {
     const { isConfirmed } = await Swal.fire({
@@ -42,7 +72,7 @@ export default function TransactionsPage() {
     <div className="min-h-screen py-8 px-4">
       <div className="max-w-3xl mx-auto">
         <div className="text-center mb-10 pt-4 relative z-10">
-          <div className="inline-flex items-center justify-center p-3 rounded-2xl mb-4 shadow-sm border transition-colors bg-gradient-to-br from-cyan-50 to-blue-50 text-cyan-600 border-cyan-100/50 dark:bg-slate-800/80 dark:text-cyan-400 dark:border-slate-700/50 dark:from-slate-800/80 dark:to-slate-800/80">
+          <div className="inline-flex items-center justify-center p-3 rounded-2xl mb-4 shadow-sm border transition-colors bg-gradient-to-br from-emerald-50 to-green-50 text-emerald-600 border-emerald-100/50 dark:bg-slate-800/80 dark:text-emerald-400 dark:border-slate-700/50 dark:from-slate-800/80 dark:to-slate-800/80">
             <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
               <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
             </svg>
@@ -61,8 +91,8 @@ export default function TransactionsPage() {
             href="/add"
             className="inline-flex items-center gap-2 px-5 py-3 rounded-xl font-bold text-white text-sm transition-transform hover:-translate-y-0.5 active:translate-y-0"
             style={{
-              background: "linear-gradient(135deg, #0e7490, #0f4c75)",
-              boxShadow: "0 8px 16px rgba(14, 116, 144, 0.25)",
+              background: "linear-gradient(135deg, #059669, #065f46)",
+              boxShadow: "0 8px 16px rgba(5, 150, 105, 0.25)",
             }}
           >
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
