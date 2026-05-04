@@ -53,7 +53,7 @@ export default function FixedCostManager() {
     setForm(EMPTY_FORM);
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (!form.description.trim()) {
       Swal.fire({ icon: "warning", title: t("swal_error_desc"), confirmButtonText: t("swal_ok") });
       return;
@@ -63,6 +63,18 @@ export default function FixedCostManager() {
       Swal.fire({ icon: "warning", title: t("swal_error_amount"), confirmButtonText: t("swal_ok") });
       return;
     }
+
+    const { isConfirmed } = await Swal.fire({
+      title: t("swal_confirm_save_title"),
+      icon: "question",
+      showCancelButton: true,
+      confirmButtonText: t("swal_confirm_save_yes"),
+      cancelButtonText: t("swal_cancel"),
+      confirmButtonColor: "#059669",
+      cancelButtonColor: "#6b7280",
+    });
+    if (!isConfirmed) return;
+
     const payload = { ...form, amount, dayOfMonth: Number(form.dayOfMonth) };
     if (editingId) {
       setFixedCosts(updateFixedCost({ ...payload, id: editingId }, fixedCosts));
@@ -70,6 +82,12 @@ export default function FixedCostManager() {
       setFixedCosts(addFixedCost(payload, fixedCosts));
     }
     handleCancel();
+    Swal.fire({
+      icon: "success",
+      title: t("swal_saved_title"),
+      timer: 1500,
+      showConfirmButton: false,
+    });
   };
 
   const handleDelete = async (id) => {

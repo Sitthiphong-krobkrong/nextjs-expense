@@ -15,7 +15,12 @@ function persist(list) {
 }
 
 export function addFixedCost(fc, list) {
-  const item = { ...fc, id: Date.now(), lastApplied: null, createdAt: new Date().toISOString() };
+  const now = new Date();
+  const currentMonth = now.toISOString().substring(0, 7);
+  const currentYear = String(now.getFullYear());
+  // ตั้ง lastApplied เป็นเดือน/ปีปัจจุบัน เพื่อไม่ให้ apply ย้อนหลังทันทีที่สร้าง
+  const lastApplied = fc.frequency === 'yearly' ? currentYear : currentMonth;
+  const item = { ...fc, id: Date.now(), lastApplied, createdAt: now.toISOString() };
   const updated = [...list, item];
   persist(updated);
   return updated;
@@ -57,7 +62,10 @@ export function applyDueFixedCosts(fixedCosts) {
       if (today.getDate() < fc.dayOfMonth) return fc;
 
       const txDate = new Date(today.getFullYear(), today.getMonth(), fc.dayOfMonth);
-      applied.push({ description: fc.description, amount: fc.amount, type: fc.type, date: txDate.toISOString() });
+      const y = txDate.getFullYear();
+      const m = String(txDate.getMonth() + 1).padStart(2, '0');
+      const d = String(txDate.getDate()).padStart(2, '0');
+      applied.push({ description: fc.description, amount: fc.amount, type: fc.type, date: `${y}-${m}-${d}T00:00:00.000` });
       return { ...fc, lastApplied: currentMonth };
     }
 
@@ -68,7 +76,10 @@ export function applyDueFixedCosts(fixedCosts) {
       if (today.getMonth() === start.getMonth() && today.getDate() < start.getDate()) return fc;
 
       const txDate = new Date(today.getFullYear(), start.getMonth(), start.getDate());
-      applied.push({ description: fc.description, amount: fc.amount, type: fc.type, date: txDate.toISOString() });
+      const y = txDate.getFullYear();
+      const m = String(txDate.getMonth() + 1).padStart(2, '0');
+      const d = String(txDate.getDate()).padStart(2, '0');
+      applied.push({ description: fc.description, amount: fc.amount, type: fc.type, date: `${y}-${m}-${d}T00:00:00.000` });
       return { ...fc, lastApplied: currentYear };
     }
 
