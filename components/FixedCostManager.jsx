@@ -81,7 +81,7 @@ export default function FixedCostManager() {
       showCancelButton: true,
       confirmButtonText: t("swal_confirm_save_yes"),
       cancelButtonText: t("swal_cancel"),
-      confirmButtonColor: "#059669",
+      confirmButtonColor: "#0284c7",
       cancelButtonColor: "#6b7280",
     });
     if (!isConfirmed) return;
@@ -188,7 +188,7 @@ export default function FixedCostManager() {
                   form.type === tp
                     ? tp === "expense"
                       ? "bg-red-500 text-white shadow-md shadow-red-500/30"
-                      : "bg-emerald-500 text-white shadow-md shadow-emerald-500/30"
+                      : "bg-sky-500 text-white shadow-md shadow-sky-500/30"
                     : "bg-slate-100 dark:bg-slate-800 text-slate-400 dark:text-slate-500"
                 }`}
               >
@@ -243,13 +243,20 @@ export default function FixedCostManager() {
           {form.frequency === "monthly" && (
             <div className="mb-4">
               <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-1.5 uppercase tracking-wide">
-                {t("fixed_day_of_month")} (1–28)
+                {t("fixed_day_of_month")} (1–31)
               </label>
               <input
-                type="number" min="1" max="28" value={form.dayOfMonth}
-                onChange={(e) => setForm((f) => ({ ...f, dayOfMonth: Math.min(28, Math.max(1, Number(e.target.value))) }))}
+                type="number" min="1" max="31" value={form.dayOfMonth}
+                onChange={(e) => setForm((f) => ({ ...f, dayOfMonth: Math.min(31, Math.max(1, Number(e.target.value))) }))}
                 className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white/80 dark:bg-slate-800/80 text-slate-800 dark:text-slate-100 font-semibold focus:outline-none focus:ring-2 focus:ring-violet-400/50"
               />
+              {form.dayOfMonth > 28 && (
+                <p className="text-[11px] text-amber-600 dark:text-amber-400 mt-1.5">
+                  {lang === "th"
+                    ? `เดือนที่ไม่มีวันที่ ${form.dayOfMonth} จะตัดในวันสุดท้ายของเดือนแทน`
+                    : `Months without day ${form.dayOfMonth} will fall on the last day of that month`}
+                </p>
+              )}
             </div>
           )}
 
@@ -317,7 +324,7 @@ export default function FixedCostManager() {
                     <span className="font-extrabold text-slate-800 dark:text-slate-100 truncate">{fc.description}</span>
                     <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full ${
                       isApplied
-                        ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-400"
+                        ? "bg-sky-100 text-sky-700 dark:bg-sky-900/40 dark:text-sky-400"
                         : "bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-400"
                     }`}>
                       {isApplied ? t("fixed_applied") : t("fixed_pending")}
