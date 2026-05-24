@@ -77,12 +77,12 @@ export default function BottomNav() {
               href={href}
               className={`flex-1 flex flex-col items-center justify-center gap-0.5 transition-colors relative ${
                 active
-                  ? "text-emerald-600 dark:text-emerald-400"
+                  ? "text-sky-600 dark:text-sky-400"
                   : "text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300"
               }`}
             >
               {active && (
-                <span className="absolute top-0 left-1/2 -translate-x-1/2 w-8 h-0.5 rounded-full bg-emerald-500 dark:bg-emerald-400" />
+                <span className="absolute top-0 left-1/2 -translate-x-1/2 w-8 h-0.5 rounded-full bg-sky-500 dark:bg-sky-400" />
               )}
               <span className={`transition-transform ${active ? "scale-110" : ""}`}>{icon}</span>
               <span className="text-[10px] font-semibold tracking-wide">{label}</span>

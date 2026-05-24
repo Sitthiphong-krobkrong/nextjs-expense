@@ -3,14 +3,14 @@
 @custom-variant dark (&:is(.dark *));
 
 .text-gradient-primary {
-  background: linear-gradient(135deg, #059669, #065f46);
+  background: linear-gradient(135deg, #0284c7, #0369a1);
   background-clip: text;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
 }
 
 .dark .text-gradient-primary {
-  background: linear-gradient(135deg, #34d399, #6ee7b7);
+  background: linear-gradient(135deg, #38bdf8, #7dd3fc);
   background-clip: text;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -18,11 +18,11 @@
 
 body {
   color: #0f172a;
-  background-color: #f8faf9;
-  background-image: 
-    radial-gradient(at 0% 0%, rgba(16, 185, 129, 0.12) 0px, transparent 50%),
-    radial-gradient(at 100% 0%, rgba(5, 150, 105, 0.10) 0px, transparent 50%),
-    radial-gradient(at 50% 100%, rgba(52, 211, 153, 0.10) 0px, transparent 50%);
+  background-color: #f0f9ff;
+  background-image:
+    radial-gradient(at 0% 0%, rgba(2, 132, 199, 0.12) 0px, transparent 50%),
+    radial-gradient(at 100% 0%, rgba(3, 105, 161, 0.10) 0px, transparent 50%),
+    radial-gradient(at 50% 100%, rgba(56, 189, 248, 0.10) 0px, transparent 50%);
   background-attachment: fixed;
   background-size: 200% 200%;
   animation: bgGlow 15s ease infinite alternate;
@@ -64,11 +64,11 @@ body {
 
 .dark body {
   color: #f1f5f9;
-  background-color: #020617;
-  background-image: 
-    radial-gradient(at 0% 0%, rgba(16, 185, 129, 0.15) 0px, transparent 50%),
-    radial-gradient(at 100% 0%, rgba(5, 150, 105, 0.12) 0px, transparent 50%),
-    radial-gradient(at 50% 100%, rgba(52, 211, 153, 0.08) 0px, transparent 50%);
+  background-color: #061829;
+  background-image:
+    radial-gradient(at 0% 0%, rgba(2, 132, 199, 0.15) 0px, transparent 50%),
+    radial-gradient(at 100% 0%, rgba(3, 105, 161, 0.12) 0px, transparent 50%),
+    radial-gradient(at 50% 100%, rgba(56, 189, 248, 0.08) 0px, transparent 50%);
 }
 
 .dark .glass-card {

@@ -1,11 +1,9 @@
 "use client";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useMemo } from "react";
 import {
   loadTransactions,
-  addTransactionsBatch,
   deleteTransaction,
 } from "../../services/transactionService";
-import { loadFixedCosts, applyDueFixedCosts } from "../../services/fixedCostService";
 import TransactionList from "../../components/TransactionList";
 import Dashboard from "../../components/Dashboard";
 import Swal from "sweetalert2";
@@ -15,40 +13,27 @@ import { useRouter } from "next/navigation";
 
 export default function TransactionsPage() {
   const [transactions, setTransactions] = useState(() => loadTransactions());
+  const [viewMode, setViewMode] = useState("month"); // "all" | "month"
   const { t } = useLang();
   const router = useRouter();
-  const fixedCostApplied = useRef(false);
 
-  // Re-read localStorage on mount and when transactions change in another page
-  useEffect(() => {
-    const refresh = () => setTransactions(loadTransactions());
-    // Listen for custom event dispatched after saving in /add page
-    window.addEventListener("transactions-updated", refresh);
-    // Also refresh on mount
-    refresh();
-    return () => window.removeEventListener("transactions-updated", refresh);
+  const currentMonth = useMemo(() => {
+    const now = new Date();
+    return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
   }, []);
 
+  const filteredTransactions = useMemo(() => {
+    if (viewMode === "all") return transactions;
+    return transactions.filter((tx) => tx.date?.startsWith(currentMonth));
+  }, [transactions, viewMode, currentMonth]);
+
+  // Re-read localStorage on mount and when transactions change elsewhere
+  // (เช่น หลัง save ใน /add หรือ FixedCostApplier ใน layout apply รายการประจำ)
   useEffect(() => {
-    // ป้องกัน Strict Mode รันซ้ำ → Swal กระพริบ
-    if (fixedCostApplied.current) return;
-    fixedCostApplied.current = true;
-
-    const fixedCosts = loadFixedCosts();
-    if (!fixedCosts.length) return;
-    const { applied } = applyDueFixedCosts(fixedCosts);
-    if (!applied.length) return;
-
-    const list = addTransactionsBatch(applied, loadTransactions());
-    setTransactions(list);
-
-    Swal.fire({
-      title: t("swal_fixed_applied_title"),
-      text: `${applied.length} ${t("swal_fixed_applied_text")}`,
-      icon: "info",
-      timer: 2500,
-      showConfirmButton: false,
-    });
+    const refresh = () => setTransactions(loadTransactions());
+    window.addEventListener("transactions-updated", refresh);
+    refresh();
+    return () => window.removeEventListener("transactions-updated", refresh);
   }, []);
 
   const handleDelete = async (id) => {
@@ -77,7 +62,7 @@ export default function TransactionsPage() {
     <div className="min-h-screen py-8 px-4">
       <div className="max-w-3xl mx-auto">
         <div className="text-center mb-10 pt-4 relative z-10">
-          <div className="inline-flex items-center justify-center p-3 rounded-2xl mb-4 shadow-sm border transition-colors bg-gradient-to-br from-emerald-50 to-green-50 text-emerald-600 border-emerald-100/50 dark:bg-slate-800/80 dark:text-emerald-400 dark:border-slate-700/50 dark:from-slate-800/80 dark:to-slate-800/80">
+          <div className="inline-flex items-center justify-center p-3 rounded-2xl mb-4 shadow-sm border transition-colors bg-gradient-to-br from-sky-50 to-sky-50 text-sky-600 border-sky-100/50 dark:bg-slate-800/80 dark:text-sky-400 dark:border-slate-700/50 dark:from-slate-800/80 dark:to-slate-800/80">
             <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
               <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
             </svg>
@@ -88,7 +73,12 @@ export default function TransactionsPage() {
           <p className="font-medium text-gray-500 dark:text-slate-400">{t("page_subtitle")}</p>
         </div>
 
-        <Dashboard transactions={transactions} />
+        <Dashboard
+          transactions={transactions}
+          filteredTransactions={filteredTransactions}
+          viewMode={viewMode}
+          onViewModeChange={setViewMode}
+        />
 
         {/* Add button for desktop */}
         <div className="hidden sm:flex justify-end mb-4">
@@ -96,8 +86,8 @@ export default function TransactionsPage() {
             href="/add"
             className="inline-flex items-center gap-2 px-5 py-3 rounded-xl font-bold text-white text-sm transition-transform hover:-translate-y-0.5 active:translate-y-0"
             style={{
-              background: "linear-gradient(135deg, #059669, #065f46)",
-              boxShadow: "0 8px 16px rgba(5, 150, 105, 0.25)",
+              background: "linear-gradient(135deg, #0284c7, #075985)",
+              boxShadow: "0 8px 16px rgba(2, 132, 199, 0.25)",
             }}
           >
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
@@ -108,7 +98,7 @@ export default function TransactionsPage() {
         </div>
 
         <TransactionList
-          items={transactions}
+          items={filteredTransactions}
           onEdit={(tx) => router.push(`/add?edit=${tx.id}`)}
           onDelete={handleDelete}
         />

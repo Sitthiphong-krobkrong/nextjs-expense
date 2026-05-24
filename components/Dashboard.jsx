@@ -41,15 +41,17 @@ const centerTextPlugin = {
 
 Chart.register(centerTextPlugin);
 
-export default function Dashboard({ transactions }) {
+export default function Dashboard({ transactions, filteredTransactions, viewMode, onViewModeChange }) {
   const { resolvedTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
   useEffect(() => setMounted(true), []);
   const isDark = mounted && resolvedTheme === "dark";
   const { t, lang } = useLang();
 
-  const income = transactions.filter((t) => t.type === "income").reduce((sum, t) => sum + t.amount, 0);
-  const expense = transactions.filter((t) => t.type === "expense").reduce((sum, t) => sum + t.amount, 0);
+  const scopedTransactions = filteredTransactions ?? transactions;
+
+  const income = scopedTransactions.filter((t) => t.type === "income").reduce((sum, t) => sum + t.amount, 0);
+  const expense = scopedTransactions.filter((t) => t.type === "expense").reduce((sum, t) => sum + t.amount, 0);
   const balance = income - expense;
 
   const hasData = income > 0 || expense > 0;
@@ -146,9 +148,33 @@ export default function Dashboard({ transactions }) {
 
   return (
     <>
+      {/* View Mode Toggle */}
+      {onViewModeChange && (
+        <div className="flex justify-center mb-4">
+          <div className="inline-flex rounded-2xl bg-white/60 dark:bg-slate-800/60 backdrop-blur-md p-1 shadow-md border border-slate-200/50 dark:border-slate-700/50">
+            {[
+              { key: "all", label: t("dash_view_all") },
+              { key: "month", label: t("dash_view_month") },
+            ].map(({ key, label }) => (
+              <button
+                key={key}
+                onClick={() => onViewModeChange(key)}
+                className={`px-5 py-2 rounded-xl text-sm font-semibold transition-all ${
+                  viewMode === key
+                    ? "bg-sky-500 text-white shadow-sm"
+                    : "text-slate-600 dark:text-slate-300 hover:text-sky-600 dark:hover:text-sky-400"
+                }`}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
       {/* Doughnut Chart Card */}
-      <div className="glass-card mb-6 rounded-3xl shadow-xl shadow-emerald-900/5 p-6 sm:p-8 relative overflow-hidden transition-colors duration-300">
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-72 h-72 bg-emerald-400/8 rounded-full blur-3xl pointer-events-none -z-10" />
+      <div className="glass-card mb-6 rounded-3xl shadow-xl shadow-sky-900/5 p-6 sm:p-8 relative overflow-hidden transition-colors duration-300">
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-72 h-72 bg-sky-400/8 rounded-full blur-3xl pointer-events-none -z-10" />
 
         <div className="flex flex-col items-center gap-4">
           {/* Chart */}
@@ -248,10 +274,10 @@ export default function Dashboard({ transactions }) {
 
       {/* Bar Chart — monthly */}
       {monthlyData.hasData && (
-        <div className="glass-card rounded-3xl shadow-xl shadow-emerald-900/5 p-6 mb-8 relative overflow-hidden transition-colors duration-300">
+        <div className="glass-card rounded-3xl shadow-xl shadow-sky-900/5 p-6 mb-8 relative overflow-hidden transition-colors duration-300">
           <div className="flex items-center gap-3 mb-5">
-            <div className="w-9 h-9 rounded-xl flex items-center justify-center bg-emerald-100 dark:bg-emerald-900/40">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="text-emerald-600 dark:text-emerald-400">
+            <div className="w-9 h-9 rounded-xl flex items-center justify-center bg-sky-100 dark:bg-sky-900/40">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="text-sky-600 dark:text-sky-400">
                 <line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/>
               </svg>
             </div>
@@ -268,7 +294,7 @@ export default function Dashboard({ transactions }) {
             data={{
               labels: monthlyData.labels,
               datasets: [
-                { label: t("dash_income_label"), data: monthlyData.income, backgroundColor: "rgba(52,211,153,0.8)", borderRadius: 8, borderSkipped: false },
+                { label: t("dash_income_label"), data: monthlyData.income, backgroundColor: "rgba(52, 211, 153,0.8)", borderRadius: 8, borderSkipped: false },
                 { label: t("dash_expense_label"), data: monthlyData.expense, backgroundColor: "rgba(248,113,113,0.8)", borderRadius: 8, borderSkipped: false },
               ],
             }}

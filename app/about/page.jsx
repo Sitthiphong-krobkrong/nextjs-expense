@@ -13,7 +13,7 @@ export default function AboutPage() {
     <div className="min-h-screen py-12 px-4">
       <div className="max-w-4xl mx-auto">
         <div className="text-center mb-12 relative z-10 pt-4">
-          <div className={`inline-flex items-center justify-center p-3 sm:p-4 rounded-2xl mb-4 shadow-sm border transition-colors ${isDark ? 'bg-emerald-900/40 text-emerald-400 border-emerald-800/50' : 'bg-emerald-50 text-emerald-600 border-emerald-100'}`}>
+          <div className={`inline-flex items-center justify-center p-3 sm:p-4 rounded-2xl mb-4 shadow-sm border transition-colors ${isDark ? 'bg-sky-900/40 text-sky-400 border-sky-800/50' : 'bg-sky-50 text-sky-600 border-sky-100'}`}>
              <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <circle cx="12" cy="12" r="10"></circle>
                 <line x1="12" y1="16" x2="12" y2="12"></line>
@@ -21,7 +21,7 @@ export default function AboutPage() {
              </svg>
           </div>
           <h1 className="text-4xl md:text-5xl font-extrabold mb-4" style={{
-            background: isDark ? "linear-gradient(135deg, #34d399, #6ee7b7)" : "linear-gradient(135deg, #059669, #065f46)",
+            background: isDark ? "linear-gradient(135deg, #38bdf8, #7dd3fc)" : "linear-gradient(135deg, #0284c7, #075985)",
             WebkitBackgroundClip: "text",
             WebkitTextFillColor: "transparent",
             backgroundClip: "text",
@@ -36,7 +36,7 @@ export default function AboutPage() {
         <div className="grid md:grid-cols-3 gap-6 mb-12">
           {/* Feature 1 */}
           <div className="glass-card p-6 rounded-3xl hover:-translate-y-1 transition-all duration-300">
-            <div className={`w-12 h-12 rounded-2xl flex items-center justify-center mb-4 shadow-inner ${isDark ? 'bg-emerald-900/40 text-emerald-400' : 'bg-gradient-to-br from-emerald-100 to-teal-100 text-teal-600'}`}>
+            <div className={`w-12 h-12 rounded-2xl flex items-center justify-center mb-4 shadow-inner ${isDark ? 'bg-sky-900/40 text-sky-400' : 'bg-gradient-to-br from-sky-100 to-sky-100 text-sky-600'}`}>
                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
                </svg>
@@ -66,7 +66,7 @@ export default function AboutPage() {
 
           {/* Feature 3 */}
           <div className="glass-card p-6 rounded-3xl hover:-translate-y-1 transition-all duration-300">
-            <div className={`w-12 h-12 rounded-2xl flex items-center justify-center mb-4 shadow-inner ${isDark ? 'bg-emerald-900/40 text-emerald-400' : 'bg-gradient-to-br from-emerald-100 to-green-100 text-emerald-600'}`}>
+            <div className={`w-12 h-12 rounded-2xl flex items-center justify-center mb-4 shadow-inner ${isDark ? 'bg-sky-900/40 text-sky-400' : 'bg-gradient-to-br from-sky-100 to-sky-100 text-sky-600'}`}>
                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
                </svg>
@@ -81,7 +81,7 @@ export default function AboutPage() {
         {/* Contact Strip */}
         <div className="bg-gradient-to-r from-gray-900 to-slate-800 rounded-3xl p-8 text-center text-white shadow-2xl relative overflow-hidden">
           <div className="absolute top-0 right-0 -mr-16 -mt-16 w-64 h-64 rounded-full bg-slate-700/30 blur-3xl"></div>
-          <div className="absolute bottom-0 left-0 -ml-16 -mb-16 w-64 h-64 rounded-full bg-emerald-700/20 blur-3xl"></div>
+          <div className="absolute bottom-0 left-0 -ml-16 -mb-16 w-64 h-64 rounded-full bg-sky-700/20 blur-3xl"></div>
           <div className="relative z-10">
             <h2 className="text-2xl font-bold mb-3">{t("about_contact_title")}</h2>
             <p className="text-slate-300 mb-6 max-w-lg mx-auto">
