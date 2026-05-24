@@ -29,17 +29,20 @@ function AddPageContent() {
     setTransactions(updated);
     // Notify other pages (e.g. transaction list) that data changed
     window.dispatchEvent(new Event("transactions-updated"));
-    router.push("/");
+    // โหมดแก้ไข: กลับหน้าหลักทันที
+    // โหมดเพิ่มใหม่: TransactionForm จะถามผู้ใช้เองผ่าน onNavigateHome
+    if (editingTx) router.push("/");
   };
 
   const handleCancel = () => router.push("/");
+  const handleNavigateHome = () => router.push("/");
 
   if (editingTx) {
     return (
       <div className="min-h-screen py-8 px-4">
         <div className="max-w-3xl mx-auto">
           <div className="text-center mb-10 pt-4">
-            <div className="inline-flex items-center justify-center p-3 rounded-2xl mb-4 shadow-sm border bg-gradient-to-br from-emerald-50 to-green-50 text-emerald-600 border-emerald-100/50 dark:bg-slate-800/80 dark:text-emerald-400 dark:border-slate-700/50 dark:from-slate-800/80 dark:to-slate-800/80">
+            <div className="inline-flex items-center justify-center p-3 rounded-2xl mb-4 shadow-sm border bg-gradient-to-br from-sky-50 to-sky-50 text-sky-600 border-sky-100/50 dark:bg-slate-800/80 dark:text-sky-400 dark:border-slate-700/50 dark:from-slate-800/80 dark:to-slate-800/80">
               <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/>
                 <path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/>
@@ -62,7 +65,7 @@ function AddPageContent() {
         <div className="text-center mb-8 pt-4">
           <div className={`inline-flex items-center justify-center p-3 rounded-2xl mb-4 shadow-sm border transition-colors ${
             tab === "add"
-              ? "bg-gradient-to-br from-emerald-50 to-green-50 text-emerald-600 border-emerald-100/50 dark:from-slate-800/80 dark:to-slate-800/80 dark:text-emerald-400 dark:border-slate-700/50"
+              ? "bg-gradient-to-br from-sky-50 to-sky-50 text-sky-600 border-sky-100/50 dark:from-slate-800/80 dark:to-slate-800/80 dark:text-sky-400 dark:border-slate-700/50"
               : "bg-gradient-to-br from-violet-50 to-purple-50 text-violet-600 border-violet-100/50 dark:from-slate-800/80 dark:to-slate-800/80 dark:text-violet-400 dark:border-slate-700/50"
           }`}>
             {tab === "add" ? (
@@ -113,7 +116,13 @@ function AddPageContent() {
         </div>
 
         {tab === "add" ? (
-          <TransactionForm key="new" onSave={handleSave} editing={null} onCancel={handleCancel} />
+          <TransactionForm
+            key="new"
+            onSave={handleSave}
+            editing={null}
+            onCancel={handleCancel}
+            onNavigateHome={handleNavigateHome}
+          />
         ) : (
           <FixedCostManager />
         )}

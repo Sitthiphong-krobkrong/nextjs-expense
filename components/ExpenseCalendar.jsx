@@ -2,6 +2,7 @@
 import { useMemo, useState, useEffect } from "react";
 import { useTheme } from "next-themes";
 import { useLang } from "../app/hooks/useLanguage";
+import { getCategoryById, COLOR_CLASSES } from "../lib/categories";
 
 const DAY_LABELS = ["อา", "จ", "อ", "พ", "พฤ", "ศ", "ส"];
 
@@ -139,16 +140,16 @@ export default function ExpenseCalendar({ transactions }) {
   };
 
   return (
-    <div className="glass-card rounded-3xl shadow-xl shadow-emerald-900/5 mb-8 overflow-hidden relative transition-colors duration-300">
+    <div className="glass-card rounded-3xl shadow-xl shadow-sky-900/5 mb-8 overflow-hidden relative transition-colors duration-300">
       {/* Background glows */}
-      <div className="absolute -top-20 -left-20 w-60 h-60 bg-emerald-400/10 rounded-full blur-3xl pointer-events-none -z-10" />
-      <div className="absolute -bottom-20 -right-20 w-60 h-60 bg-emerald-400/10 rounded-full blur-3xl pointer-events-none -z-10" />
+      <div className="absolute -top-20 -left-20 w-60 h-60 bg-sky-400/10 rounded-full blur-3xl pointer-events-none -z-10" />
+      <div className="absolute -bottom-20 -right-20 w-60 h-60 bg-sky-400/10 rounded-full blur-3xl pointer-events-none -z-10" />
 
       {/* ── Header ── */}
-      <div className="px-5 sm:px-6 py-4 border-b flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-indigo-50/60 dark:border-slate-700/50 bg-gradient-to-br from-violet-50/50 to-green-50/50 dark:from-emerald-900/15 dark:to-emerald-900/15">
+      <div className="px-5 sm:px-6 py-4 border-b flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-sky-100/60 dark:border-slate-700/50 bg-gradient-to-br from-sky-50/60 to-cyan-50/50 dark:from-sky-900/15 dark:to-sky-900/15">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl flex items-center justify-center bg-emerald-100 dark:bg-emerald-900/40">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" className="text-emerald-600 dark:text-emerald-400" strokeWidth="2.5">
+          <div className="w-10 h-10 rounded-xl flex items-center justify-center bg-sky-100 dark:bg-sky-900/40">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" className="text-sky-600 dark:text-sky-400" strokeWidth="2.5">
               <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
               <line x1="16" y1="2" x2="16" y2="6" />
               <line x1="8" y1="2" x2="8" y2="6" />
@@ -157,17 +158,17 @@ export default function ExpenseCalendar({ transactions }) {
           </div>
           <div>
             <h2 className="text-lg font-extrabold text-slate-800 dark:text-slate-100">{t("cal_title")}</h2>
-            <p className="text-xs font-medium text-emerald-600 dark:text-emerald-400/70">{t("cal_subtitle")}</p>
+            <p className="text-xs font-medium text-sky-600 dark:text-sky-400/70">{t("cal_subtitle")}</p>
           </div>
         </div>
 
         {/* View mode toggle */}
-        <div className="flex rounded-xl overflow-hidden border border-emerald-200/60 dark:border-slate-600/50 shadow-sm self-end sm:self-auto">
+        <div className="flex rounded-xl overflow-hidden border border-sky-200/60 dark:border-slate-600/50 shadow-sm self-end sm:self-auto">
           <button
             onClick={() => setViewMode("daily")}
             className={`px-4 py-2 text-xs font-extrabold tracking-wide transition-all ${viewMode === "daily"
-                ? "bg-gradient-to-br from-emerald-500 to-green-600 text-white"
-                : "bg-white/50 dark:bg-slate-800/50 text-emerald-600 dark:text-emerald-300 hover:bg-emerald-50 dark:hover:bg-slate-700/50"
+                ? "bg-gradient-to-br from-sky-500 to-sky-600 text-white"
+                : "bg-white/50 dark:bg-slate-800/50 text-sky-600 dark:text-sky-300 hover:bg-sky-50 dark:hover:bg-slate-700/50"
               }`}
           >
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="inline-block mr-1"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>{t("cal_daily")}
@@ -175,8 +176,8 @@ export default function ExpenseCalendar({ transactions }) {
           <button
             onClick={() => setViewMode("weekly")}
             className={`px-4 py-2 text-xs font-extrabold tracking-wide transition-all ${viewMode === "weekly"
-                ? "bg-gradient-to-br from-emerald-500 to-green-600 text-white"
-                : "bg-white/50 dark:bg-slate-800/50 text-emerald-600 dark:text-emerald-300 hover:bg-emerald-50 dark:hover:bg-slate-700/50"
+                ? "bg-gradient-to-br from-sky-500 to-sky-600 text-white"
+                : "bg-white/50 dark:bg-slate-800/50 text-sky-600 dark:text-sky-300 hover:bg-sky-50 dark:hover:bg-slate-700/50"
               }`}
           >
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="inline-block mr-1"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>{t("cal_weekly")}
@@ -188,7 +189,7 @@ export default function ExpenseCalendar({ transactions }) {
       <div className="px-5 sm:px-6 py-4 flex items-center justify-between">
         <button
           onClick={() => navigateMonth(-1)}
-          className="w-10 h-10 rounded-xl flex items-center justify-center hover:bg-emerald-100 dark:hover:bg-emerald-900/30 transition-colors text-emerald-600 dark:text-emerald-400"
+          className="w-10 h-10 rounded-xl flex items-center justify-center hover:bg-sky-100 dark:hover:bg-sky-900/30 transition-colors text-sky-600 dark:text-sky-400"
           aria-label="เดือนก่อน"
         >
           <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
@@ -200,7 +201,7 @@ export default function ExpenseCalendar({ transactions }) {
           <span className="text-lg font-extrabold text-slate-800 dark:text-slate-100 tracking-wide">{monthLabel}</span>
           <button
             onClick={goToToday}
-            className="text-[11px] font-bold px-3 py-1.5 rounded-lg bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-300 hover:bg-emerald-200 dark:hover:bg-emerald-800/40 transition-colors border border-emerald-200/50 dark:border-emerald-700/30"
+            className="text-[11px] font-bold px-3 py-1.5 rounded-lg bg-sky-100 dark:bg-sky-900/30 text-sky-600 dark:text-sky-300 hover:bg-sky-200 dark:hover:bg-sky-800/40 transition-colors border border-sky-200/50 dark:border-sky-700/30"
           >
             {t("cal_today")}
           </button>
@@ -208,7 +209,7 @@ export default function ExpenseCalendar({ transactions }) {
 
         <button
           onClick={() => navigateMonth(1)}
-          className="w-10 h-10 rounded-xl flex items-center justify-center hover:bg-emerald-100 dark:hover:bg-emerald-900/30 transition-colors text-emerald-600 dark:text-emerald-400"
+          className="w-10 h-10 rounded-xl flex items-center justify-center hover:bg-sky-100 dark:hover:bg-sky-900/30 transition-colors text-sky-600 dark:text-sky-400"
           aria-label="เดือนถัดไป"
         >
           <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
@@ -220,7 +221,7 @@ export default function ExpenseCalendar({ transactions }) {
       {/* ── Monthly summary ── */}
       <div className="px-5 sm:px-6 pb-4 grid grid-cols-2 gap-3">
         <div className="rounded-2xl py-3 px-4 bg-emerald-50/80 dark:bg-emerald-900/20 border border-emerald-200/50 dark:border-emerald-700/30">
-          <p className="text-[11px] font-bold text-emerald-500 dark:text-emerald-400 mb-1 flex items-center gap-1">
+          <p className="text-[11px] font-bold text-emerald-600 dark:text-emerald-400 mb-1 flex items-center gap-1">
             <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M12 19V5M5 12l7 7 7-7"/></svg>{t("cal_income_month")}
           </p>
           <p className="text-lg font-extrabold text-emerald-700 dark:text-emerald-300">+{monthTotal.income.toLocaleString()} <span className="text-sm">฿</span></p>
@@ -241,7 +242,7 @@ export default function ExpenseCalendar({ transactions }) {
             {DAY_LABELS.map((label, i) => (
               <div
                 key={label}
-                className={`text-center py-2 text-xs font-extrabold tracking-wider ${i === 0 ? "text-rose-400" : i === 6 ? "text-emerald-400" : "text-slate-400 dark:text-slate-500"
+                className={`text-center py-2 text-xs font-extrabold tracking-wider ${i === 0 ? "text-rose-400" : i === 6 ? "text-sky-400" : "text-slate-400 dark:text-slate-500"
                   }`}
               >
                 {label}
@@ -271,12 +272,12 @@ export default function ExpenseCalendar({ transactions }) {
                         transition-all duration-200
                         ${!day ? "pointer-events-none opacity-0" : "cursor-pointer active:scale-[0.95] sm:hover:scale-[1.03]"}
                         ${isSelected
-                          ? "ring-2 ring-emerald-500 dark:ring-emerald-400 bg-emerald-50 dark:bg-emerald-900/40 shadow-md sm:shadow-lg shadow-emerald-500/15"
+                          ? "ring-2 ring-sky-500 dark:ring-sky-400 bg-sky-50 dark:bg-sky-900/40 shadow-md sm:shadow-lg shadow-sky-500/15"
                           : heat
                             ? `${heat} sm:hover:shadow-md`
                             : "bg-white/40 dark:bg-slate-800/20 sm:hover:bg-gray-50 dark:sm:hover:bg-slate-800/40 sm:hover:shadow-sm"
                         }
-                        ${todayMark && !isSelected ? "ring-2 ring-emerald-400 dark:ring-emerald-500 bg-emerald-50/50 dark:bg-emerald-900/20" : ""}
+                        ${todayMark && !isSelected ? "ring-2 ring-sky-400 dark:ring-sky-500 bg-sky-50/50 dark:bg-sky-900/20" : ""}
                       `}
                     >
                       {day && (
@@ -284,11 +285,11 @@ export default function ExpenseCalendar({ transactions }) {
                           {/* Day number */}
                           <span
                             className={`text-[13px] sm:text-sm font-bold leading-none ${todayMark
-                                ? "bg-emerald-500 text-white w-6 h-6 sm:w-7 sm:h-7 rounded-full flex items-center justify-center text-[11px] sm:text-[13px] shadow-sm shadow-emerald-500/30"
+                                ? "bg-sky-500 text-white w-6 h-6 sm:w-7 sm:h-7 rounded-full flex items-center justify-center text-[11px] sm:text-[13px] shadow-sm shadow-sky-500/30"
                                 : di === 0
                                   ? "text-rose-500 dark:text-rose-400"
                                   : di === 6
-                                    ? "text-emerald-500 dark:text-emerald-400"
+                                    ? "text-sky-500 dark:text-sky-400"
                                     : "text-slate-700 dark:text-slate-300"
                               }`}
                           >
@@ -326,7 +327,7 @@ export default function ExpenseCalendar({ transactions }) {
                           {/* Tx count badge — desktop only */}
                           {hasData && (
                             <div className="hidden sm:block absolute top-1 right-1">
-                              <span className="flex items-center justify-center w-4 h-4 text-[8px] font-black rounded-full bg-emerald-500 text-white shadow-sm">
+                              <span className="flex items-center justify-center w-4 h-4 text-[8px] font-black rounded-full bg-sky-500 text-white shadow-sm">
                                 {data.items.length}
                               </span>
                             </div>
@@ -362,7 +363,7 @@ export default function ExpenseCalendar({ transactions }) {
                 <span className="text-[11px] font-bold text-slate-400 dark:text-slate-500">{t("dash_expense_label")}</span>
               </div>
               <div className="flex items-center gap-1.5">
-                <span className="w-2.5 h-2.5 rounded-full bg-emerald-500" />
+                <span className="w-2.5 h-2.5 rounded-full bg-sky-500" />
                 <span className="text-[11px] font-bold text-slate-400 dark:text-slate-500">{t("dash_income_label")}</span>
               </div>
             </div>
@@ -390,7 +391,7 @@ export default function ExpenseCalendar({ transactions }) {
               <div
                 key={wi}
                 className={`rounded-2xl overflow-hidden transition-all duration-200 border ${hasTx
-                    ? "bg-white/70 dark:bg-slate-800/40 border-emerald-200/40 dark:border-slate-700/40 shadow-sm"
+                    ? "bg-white/70 dark:bg-slate-800/40 border-sky-200/40 dark:border-slate-700/40 shadow-sm"
                     : "bg-gray-50/30 dark:bg-slate-900/20 border-gray-100/50 dark:border-slate-800/30 opacity-50"
                   }`}
               >
@@ -399,12 +400,12 @@ export default function ExpenseCalendar({ transactions }) {
                   onClick={() => hasTx && setExpandedWeek(isExpanded ? null : wi)}
                   disabled={!hasTx}
                   className={`w-full px-4 py-3 flex items-center justify-between text-left transition-colors ${hasTx
-                      ? "bg-emerald-50/50 dark:bg-violet-900/15 hover:bg-violet-100/50 dark:hover:bg-violet-900/25 cursor-pointer"
+                      ? "bg-sky-50/50 dark:bg-violet-900/15 hover:bg-violet-100/50 dark:hover:bg-violet-900/25 cursor-pointer"
                       : "cursor-default"
-                    } border-b border-emerald-100/50 dark:border-slate-700/30`}
+                    } border-b border-sky-100/50 dark:border-slate-700/30`}
                 >
                   <div className="flex items-center gap-3">
-                    <span className="text-sm font-black text-emerald-600 dark:text-emerald-400 bg-emerald-100 dark:bg-emerald-900/40 px-3 py-1 rounded-xl">
+                    <span className="text-sm font-black text-sky-600 dark:text-sky-400 bg-sky-100 dark:bg-sky-900/40 px-3 py-1 rounded-xl">
                       {t("cal_week")} {wi + 1}
                     </span>
                     <div>
@@ -427,7 +428,7 @@ export default function ExpenseCalendar({ transactions }) {
                     {hasTx && (
                       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                         strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"
-                        className={`text-emerald-400 transition-transform duration-200 ${isExpanded ? "rotate-180" : ""}`}>
+                        className={`text-sky-400 transition-transform duration-200 ${isExpanded ? "rotate-180" : ""}`}>
                         <polyline points="6 9 12 15 18 9" />
                       </svg>
                     )}
@@ -466,22 +467,28 @@ export default function ExpenseCalendar({ transactions }) {
 
                 {/* Expanded transaction list */}
                 {isExpanded && hasTx && (
-                  <div className="border-t border-emerald-100/50 dark:border-slate-700/30 px-4 py-3 space-y-2 max-h-72 overflow-y-auto">
-                    {weekItems.map((tx) => (
+                  <div className="border-t border-sky-100/50 dark:border-slate-700/30 px-4 py-3 space-y-2 max-h-72 overflow-y-auto">
+                    {weekItems.map((tx) => {
+                      const cat = getCategoryById(tx.category, tx.type);
+                      const cc = COLOR_CLASSES[cat.color];
+                      const CatIcon = cat.Icon;
+                      return (
                       <div key={tx.id} className="flex items-center gap-3 p-3 rounded-2xl bg-white/70 dark:bg-slate-800/40 border border-white/60 dark:border-slate-700/30 shadow-sm">
-                        <div className={`w-9 h-9 shrink-0 rounded-xl flex items-center justify-center ${tx.type === "expense" ? "bg-rose-100 dark:bg-rose-900/40 text-rose-500" : "bg-emerald-100 dark:bg-emerald-900/40 text-emerald-500"}`}>
-                          {tx.type === "expense" ? (
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M12 5v14M5 12l7-7 7 7"/></svg>
-                          ) : (
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M12 19V5M5 12l7 7 7-7"/></svg>
-                          )}
+                        <div className={`w-9 h-9 shrink-0 rounded-xl flex items-center justify-center ${cc.bg} ${cc.text}`}>
+                          <CatIcon size={16} />
                         </div>
                         <div className="flex-1 min-w-0">
                           <p className="text-sm font-bold text-slate-800 dark:text-slate-200 truncate">{tx.description}</p>
-                          <div className="flex items-center gap-1.5 mt-0.5">
+                          <div className="flex items-center gap-1.5 mt-0.5 flex-wrap">
                             <p className="text-xs text-slate-400 dark:text-slate-500">
                               {new Date(tx.date).toLocaleDateString(locale, { weekday: "short", day: "numeric", month: "short" })}
                             </p>
+                            <span className={`text-[9px] font-black tracking-wider px-1.5 py-0.5 rounded-md ${cc.bg} ${cc.text}`}>
+                              {t(cat.labelKey)}
+                            </span>
+                            <span className={`text-[9px] font-black tracking-wider px-1.5 py-0.5 rounded-md ${tx.type === "expense" ? "bg-rose-100/80 dark:bg-rose-500/20 text-rose-700 dark:text-rose-400" : "bg-emerald-100/80 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-400"}`}>
+                              {tx.type === "expense" ? t("list_expense_badge") : t("list_income_badge")}
+                            </span>
                             {tx.isFixed && (
                               <span className="text-[9px] font-black tracking-wider px-1.5 py-0.5 rounded-md bg-amber-100/80 dark:bg-amber-500/20 text-amber-700 dark:text-amber-400">
                                 {tx.type === "expense" ? t("list_fixed_expense_badge") : t("list_fixed_income_badge")}
@@ -493,7 +500,8 @@ export default function ExpenseCalendar({ transactions }) {
                           {tx.type === "expense" ? "-" : "+"}{tx.amount.toLocaleString()} ฿
                         </span>
                       </div>
-                    ))}
+                      );
+                    })}
                   </div>
                 )}
 
@@ -510,11 +518,11 @@ export default function ExpenseCalendar({ transactions }) {
 
       {/* ══════════ Selected day detail ══════════ */}
       {selectedDay && selectedDayData && viewMode === "daily" && (
-        <div className="border-t-2 border-emerald-200/60 dark:border-slate-700/40 px-5 sm:px-6 py-5 bg-gradient-to-br from-emerald-50/40 to-white/60 dark:from-slate-900/40 dark:to-slate-900/60">
+        <div className="border-t-2 border-sky-200/60 dark:border-slate-700/40 px-5 sm:px-6 py-5 bg-gradient-to-br from-sky-50/40 to-white/60 dark:from-slate-900/40 dark:to-slate-900/60">
           {/* Header */}
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-base font-extrabold text-slate-800 dark:text-slate-100 flex items-center gap-2">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="text-emerald-500"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="text-sky-500"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>
               {new Date(viewYear, viewMonth, selectedDay).toLocaleDateString(locale, {
                 weekday: "long",
                 day: "numeric",
@@ -523,7 +531,7 @@ export default function ExpenseCalendar({ transactions }) {
             </h3>
             <button
               onClick={() => setSelectedDay(null)}
-              className="w-8 h-8 rounded-xl flex items-center justify-center hover:bg-emerald-100 dark:hover:bg-emerald-900/30 transition-colors text-slate-400 dark:text-slate-500"
+              className="w-8 h-8 rounded-xl flex items-center justify-center hover:bg-sky-100 dark:hover:bg-sky-900/30 transition-colors text-slate-400 dark:text-slate-500"
               aria-label="ปิด"
             >
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
@@ -554,33 +562,30 @@ export default function ExpenseCalendar({ transactions }) {
           <div className="space-y-2 max-h-60 overflow-y-auto pr-1">
             {selectedDayData.items
               .sort((a, b) => new Date(b.date) - new Date(a.date))
-              .map((tx) => (
+              .map((tx) => {
+                const cat = getCategoryById(tx.category, tx.type);
+                const cc = COLOR_CLASSES[cat.color];
+                const CatIcon = cat.Icon;
+                return (
                 <div
                   key={tx.id}
                   className="flex items-center gap-3 p-3 rounded-2xl bg-white/70 dark:bg-slate-800/40 border border-white/60 dark:border-slate-700/30 shadow-sm hover:shadow-md transition-shadow"
                 >
-                  <div
-                    className={`w-10 h-10 shrink-0 rounded-xl flex items-center justify-center ${tx.type === "expense"
-                        ? "bg-rose-100 dark:bg-rose-900/40 text-rose-500 dark:text-rose-400"
-                        : "bg-emerald-100 dark:bg-emerald-900/40 text-emerald-500 dark:text-emerald-400"
-                      }`}
-                  >
-                    {tx.type === "expense" ? (
-                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M5 10l7-7m0 0l7 7m-7-7v18" />
-                      </svg>
-                    ) : (
-                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M19 14l-7 7m0 0l-7-7m7 7V3" />
-                      </svg>
-                    )}
+                  <div className={`w-10 h-10 shrink-0 rounded-xl flex items-center justify-center ${cc.bg} ${cc.text}`}>
+                    <CatIcon size={18} />
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-bold text-slate-800 dark:text-slate-200 truncate">{tx.description}</p>
-                    <div className="flex items-center gap-1.5 mt-0.5">
+                    <div className="flex items-center gap-1.5 mt-0.5 flex-wrap">
                       <p className="text-xs text-slate-400 dark:text-slate-500">
                         {new Date(tx.date).toLocaleTimeString("th-TH", { hour: "2-digit", minute: "2-digit" })} น.
                       </p>
+                      <span className={`text-[9px] font-black tracking-wider px-1.5 py-0.5 rounded-md ${cc.bg} ${cc.text}`}>
+                        {t(cat.labelKey)}
+                      </span>
+                      <span className={`text-[9px] font-black tracking-wider px-1.5 py-0.5 rounded-md ${tx.type === "expense" ? "bg-rose-100/80 dark:bg-rose-500/20 text-rose-700 dark:text-rose-400" : "bg-emerald-100/80 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-400"}`}>
+                        {tx.type === "expense" ? t("list_expense_badge") : t("list_income_badge")}
+                      </span>
                       {tx.isFixed && (
                         <span className="text-[9px] font-black tracking-wider px-1.5 py-0.5 rounded-md bg-amber-100/80 dark:bg-amber-500/20 text-amber-700 dark:text-amber-400">
                           {tx.type === "expense" ? t("list_fixed_expense_badge") : t("list_fixed_income_badge")}
@@ -597,7 +602,8 @@ export default function ExpenseCalendar({ transactions }) {
                     {tx.type === "expense" ? "-" : "+"}{tx.amount.toLocaleString()} ฿
                   </span>
                 </div>
-              ))}
+                );
+              })}
           </div>
         </div>
       )}

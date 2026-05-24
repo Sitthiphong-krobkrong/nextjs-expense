@@ -3,11 +3,13 @@ import { useState, useEffect, useRef } from "react";
 import Swal from "sweetalert2";
 import useSpeechRecognition from "../app/hooks/useSpeechRecognition";
 import { useLang } from "../app/hooks/useLanguage";
+import { getCategoriesForType, defaultCategoryFor, COLOR_CLASSES } from "../lib/categories";
 
-export default function TransactionForm({ onSave, editing, onCancel }) {
+export default function TransactionForm({ onSave, editing, onCancel, onNavigateHome }) {
   const [description, setDescription] = useState("");
   const [amount, setAmount] = useState("");
   const [type, setType] = useState("expense");
+  const [category, setCategory] = useState(defaultCategoryFor("expense"));
   const [date, setDate] = useState(() => {
     const now = new Date();
     return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
@@ -48,11 +50,19 @@ export default function TransactionForm({ onSave, editing, onCancel }) {
       setDescription(editing.description);
       setAmount(String(editing.amount));
       setType(editing.type);
+      setCategory(editing.category || defaultCategoryFor(editing.type));
       setDate(editing.date ? editing.date.split("T")[0] : new Date().toLocaleDateString("en-CA"));
     } else {
       setDate(new Date().toLocaleDateString("en-CA"));
     }
   }, [editing]);
+
+  // เปลี่ยน type → reset category เป็น default ของ type นั้น
+  // (เว้นแต่ว่า current category อยู่ในกลุ่ม type ใหม่อยู่แล้ว — ซึ่งเป็นไปไม่ได้ในระบบนี้)
+  useEffect(() => {
+    const valid = getCategoriesForType(type).some((c) => c.id === category);
+    if (!valid) setCategory(defaultCategoryFor(type));
+  }, [type, category]);
 
   async function handleSubmit(e) {
     e.preventDefault();
@@ -62,7 +72,7 @@ export default function TransactionForm({ onSave, editing, onCancel }) {
       showCancelButton: true,
       confirmButtonText: t("swal_confirm_save_yes"),
       cancelButtonText: t("swal_cancel"),
-      confirmButtonColor: "#059669",
+      confirmButtonColor: "#0284c7",
       cancelButtonColor: "#6b7280",
     });
     if (!result.isConfirmed) return;
@@ -93,23 +103,41 @@ export default function TransactionForm({ onSave, editing, onCancel }) {
       description,
       amount: parsedAmount,
       type,
+      category,
       date: `${date}T00:00:00.000`,
     };
     onSave(tx);
     setDescription("");
     setAmount("");
     setType("expense");
+    setCategory(defaultCategoryFor("expense"));
     setDate(new Date().toLocaleDateString("en-CA"));
 
-    await Swal.fire({
-      icon: "success",
-      title: t("swal_saved_title"),
-      confirmButtonText: t("swal_ok"),
-      confirmButtonColor: "#059669",
-    });
+    // โหมดเพิ่มใหม่: ถาม "เพิ่มอีก" หรือ "กลับหน้าหลัก"
+    // โหมดแก้ไข: success Swal ปกติ (ปล่อยให้ parent นำทาง)
+    if (!editing && onNavigateHome) {
+      const result = await Swal.fire({
+        icon: "success",
+        title: t("swal_saved_title"),
+        showCancelButton: true,
+        confirmButtonText: t("swal_saved_back_home"),
+        cancelButtonText: t("swal_saved_add_more"),
+        confirmButtonColor: "#0284c7",
+        cancelButtonColor: "#10b981",
+        reverseButtons: true,
+      });
+      if (result.isConfirmed) onNavigateHome();
+    } else {
+      await Swal.fire({
+        icon: "success",
+        title: t("swal_saved_title"),
+        confirmButtonText: t("swal_ok"),
+        confirmButtonColor: "#0284c7",
+      });
+    }
   }
 
-  const inputClass = `w-full mt-1.5 px-4 py-3.5 border rounded-xl backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/40 focus:border-emerald-400 text-base shadow-sm transition-all border-indigo-50 bg-white/60 text-gray-800 placeholder-gray-400 hover:bg-white/90 dark:border-slate-700/50 dark:bg-slate-900/50 dark:text-slate-100 dark:placeholder-slate-500 dark:hover:bg-slate-800/60`;
+  const inputClass = `w-full mt-1.5 px-4 py-3.5 border rounded-xl backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-sky-500/40 focus:border-sky-400 text-base shadow-sm transition-all border-sky-100 bg-white/60 text-gray-800 placeholder-gray-400 hover:bg-white/90 dark:border-slate-700/50 dark:bg-slate-900/50 dark:text-slate-100 dark:placeholder-slate-500 dark:hover:bg-slate-800/60`;
 
   return (
     <form
@@ -117,20 +145,20 @@ export default function TransactionForm({ onSave, editing, onCancel }) {
       className="glass-card rounded-3xl mb-8 overflow-hidden relative transition-colors duration-300"
     >
       {/* Subtle background glow */}
-      <div className="absolute -top-24 -right-24 w-48 h-48 bg-emerald-400/10 rounded-full blur-3xl pointer-events-none"></div>
+      <div className="absolute -top-24 -right-24 w-48 h-48 bg-sky-400/10 rounded-full blur-3xl pointer-events-none"></div>
 
       {/* Form header */}
-      <div className={`px-6 py-5 border-b relative z-10 border-indigo-50/60 dark:border-slate-700/50 ${editing ? 'bg-gradient-to-br from-emerald-100/60 to-green-50/60 dark:from-emerald-900/15 dark:to-emerald-800/15' : 'bg-gradient-to-br from-emerald-50/60 to-green-50/60 dark:from-emerald-900/15 dark:to-emerald-900/15'}`}>
-        <h2 className={`text-lg font-bold flex items-center gap-3 tracking-wide ${editing ? 'text-emerald-900 dark:text-emerald-300' : 'text-emerald-900 dark:text-emerald-300'}`}>
+      <div className={`px-6 py-5 border-b relative z-10 border-sky-100/60 dark:border-slate-700/50 ${editing ? 'bg-gradient-to-br from-sky-100/60 to-sky-50/60 dark:from-sky-900/15 dark:to-sky-800/15' : 'bg-gradient-to-br from-sky-50/60 to-sky-50/60 dark:from-sky-900/15 dark:to-sky-900/15'}`}>
+        <h2 className={`text-lg font-bold flex items-center gap-3 tracking-wide ${editing ? 'text-sky-900 dark:text-sky-300' : 'text-sky-900 dark:text-sky-300'}`}>
           {editing ? (
-            <div className="p-2 rounded-lg shadow-sm bg-emerald-100 dark:bg-emerald-900/40 dark:text-emerald-300">
+            <div className="p-2 rounded-lg shadow-sm bg-sky-100 dark:bg-sky-900/40 dark:text-sky-300">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/>
                 <path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/>
               </svg>
             </div>
           ) : (
-            <div className="p-2 rounded-lg shadow-sm bg-emerald-100 dark:bg-emerald-900/40 dark:text-emerald-300">
+            <div className="p-2 rounded-lg shadow-sm bg-sky-100 dark:bg-sky-900/40 dark:text-sky-300">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                 <line x1="12" y1="5" x2="12" y2="19"></line>
                 <line x1="5" y1="12" x2="19" y2="12"></line>
@@ -151,10 +179,10 @@ export default function TransactionForm({ onSave, editing, onCancel }) {
               style={{
                 background: isListening
                   ? "linear-gradient(135deg, #ef4444, #dc2626)"
-                  : "linear-gradient(135deg, #059669, #065f46)",
+                  : "linear-gradient(135deg, #0284c7, #075985)",
                 boxShadow: isListening
                   ? "0 4px 14px rgba(239, 68, 68, 0.4)"
-                  : "0 8px 20px rgba(5, 150, 105, 0.25)",
+                  : "0 8px 20px rgba(2, 132, 199, 0.25)",
               }}
             >
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className={isListening ? "animate-pulse" : ""}>
@@ -176,7 +204,7 @@ export default function TransactionForm({ onSave, editing, onCancel }) {
         {showOverlay && (
           <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex flex-col items-center justify-center z-[100] transition-opacity duration-300">
             <div className="p-6 rounded-2xl shadow-2xl flex flex-col items-center max-w-xs w-full mx-4 bg-white dark:bg-slate-800">
-               <svg className="animate-spin mb-4 text-emerald-700 dark:text-emerald-400" width={48} height={48} viewBox="0 0 50 50">
+               <svg className="animate-spin mb-4 text-sky-700 dark:text-sky-400" width={48} height={48} viewBox="0 0 50 50">
                  <circle className="opacity-25" cx="25" cy="25" r="20" fill="none" stroke="currentColor" strokeWidth="4"/>
                  <path className="opacity-75" fill="currentColor" d="M25 5a20 20 0 0 1 20 20h-4a16 16 0 1 0-16 16V5z"/>
                </svg>
@@ -192,7 +220,7 @@ export default function TransactionForm({ onSave, editing, onCancel }) {
             onClick={() => setType("income")}
             className={`flex-1 py-3.5 rounded-xl font-bold text-sm border-2 transition-all hover:shadow-md ${
               type === "income" 
-              ? "bg-gradient-to-br from-emerald-100 to-emerald-200 dark:from-emerald-900/40 dark:to-emerald-800/40 border-emerald-500 text-emerald-800 dark:border-emerald-400 dark:text-emerald-300 shadow-[0_4px_12px_rgba(16,185,129,0.2)]" 
+              ? "bg-gradient-to-br from-emerald-100 to-emerald-200 dark:from-emerald-900/40 dark:to-emerald-800/40 border-emerald-500 text-emerald-800 dark:border-emerald-400 dark:text-emerald-300 shadow-[0_4px_12px_rgba(16,185,129,0.2)]"
               : "bg-white/50 dark:bg-black/20 border-transparent dark:border-white/5 text-gray-500 dark:text-slate-400"
             }`}
           >
@@ -202,13 +230,41 @@ export default function TransactionForm({ onSave, editing, onCancel }) {
             type="button"
             onClick={() => setType("expense")}
             className={`flex-1 py-3.5 rounded-xl font-bold text-sm border-2 transition-all hover:shadow-md ${
-              type === "expense" 
-              ? "bg-gradient-to-br from-red-100 to-red-200 dark:from-red-900/40 dark:to-red-800/40 border-red-500 text-red-800 dark:border-red-400 dark:text-red-300 shadow-[0_4px_12px_rgba(239,68,68,0.2)]" 
+              type === "expense"
+              ? "bg-gradient-to-br from-red-100 to-red-200 dark:from-red-900/40 dark:to-red-800/40 border-red-500 text-red-800 dark:border-red-400 dark:text-red-300 shadow-[0_4px_12px_rgba(239,68,68,0.2)]"
               : "bg-white/50 dark:bg-black/20 border-transparent dark:border-white/5 text-gray-500 dark:text-slate-400"
             }`}
           >
             {t("form_expense")}
           </button>
+        </div>
+
+        {/* Category picker */}
+        <div>
+          <label className="block text-sm font-bold mb-2 ml-1 text-gray-700 dark:text-slate-300">{t("form_category")}</label>
+          <div className={`grid gap-2 ${type === "income" ? "grid-cols-3" : "grid-cols-4"}`}>
+            {getCategoriesForType(type).map((c) => {
+              const selected = category === c.id;
+              const cc = COLOR_CLASSES[c.color];
+              const Icon = c.Icon;
+              return (
+                <button
+                  key={c.id}
+                  type="button"
+                  onClick={() => setCategory(c.id)}
+                  className={`flex flex-col items-center gap-1.5 py-3 px-1 rounded-xl border-2 transition-all ${
+                    selected
+                      ? `${cc.bg} ${cc.text} border-current shadow-sm`
+                      : "bg-white/50 dark:bg-slate-900/30 border-transparent text-slate-500 dark:text-slate-400 hover:bg-white/80 dark:hover:bg-slate-800/50"
+                  }`}
+                  aria-pressed={selected}
+                >
+                  <Icon size={20} />
+                  <span className="text-[11px] font-bold leading-none">{t(c.labelKey)}</span>
+                </button>
+              );
+            })}
+          </div>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
@@ -228,7 +284,7 @@ export default function TransactionForm({ onSave, editing, onCancel }) {
                   <button
                     type="button"
                     onClick={() => setAmount("")}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 w-6 h-6 flex items-center justify-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-emerald-400 bg-gray-100 hover:bg-gray-200 text-gray-500 dark:bg-slate-700 dark:hover:bg-slate-600 dark:text-slate-300"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 w-6 h-6 flex items-center justify-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-sky-400 bg-gray-100 hover:bg-gray-200 text-gray-500 dark:bg-slate-700 dark:hover:bg-slate-600 dark:text-slate-300"
                     aria-label="ลบจำนวนเงิน"
                   >
                     <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
@@ -265,7 +321,7 @@ export default function TransactionForm({ onSave, editing, onCancel }) {
                   <button
                     type="button"
                     onClick={() => setDescription("")}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 w-6 h-6 flex items-center justify-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-emerald-400 bg-gray-100 hover:bg-gray-200 text-gray-500 dark:bg-slate-700 dark:hover:bg-slate-600 dark:text-slate-300"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 w-6 h-6 flex items-center justify-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-sky-400 bg-gray-100 hover:bg-gray-200 text-gray-500 dark:bg-slate-700 dark:hover:bg-slate-600 dark:text-slate-300"
                     aria-label="ลบรายละเอียด"
                   >
                     <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
@@ -284,8 +340,8 @@ export default function TransactionForm({ onSave, editing, onCancel }) {
             type="submit"
             className="flex-1 py-3.5 rounded-xl font-bold text-white flex items-center justify-center gap-2 text-base transition-transform hover:-translate-y-0.5 active:translate-y-0"
             style={{
-              background: "linear-gradient(135deg, #059669, #065f46)",
-              boxShadow: "0 8px 16px rgba(5, 150, 105, 0.25)",
+              background: "linear-gradient(135deg, #0284c7, #075985)",
+              boxShadow: "0 8px 16px rgba(2, 132, 199, 0.25)",
             }}
           >
             {editing ? (

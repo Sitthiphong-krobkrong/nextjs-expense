@@ -1,5 +1,6 @@
 import { useState, Fragment } from "react";
 import { useLang } from "../app/hooks/useLanguage";
+import { getCategoryById, COLOR_CLASSES } from "../lib/categories";
 
 function groupByDate(items) {
   const map = new Map();
@@ -65,22 +66,22 @@ export default function TransactionList({ items, onEdit, onDelete }) {
   const groups = groupByDate(pagedItems);
 
   return (
-    <div className="glass-card border border-white/60 rounded-3xl overflow-hidden mb-8 shadow-xl shadow-emerald-900/5 relative">
-      <div className="absolute top-0 right-0 w-64 h-64 bg-emerald-100/30 rounded-full blur-3xl pointer-events-none" />
+    <div className="glass-card border border-white/60 rounded-3xl overflow-hidden mb-8 shadow-xl shadow-sky-900/5 relative">
+      <div className="absolute top-0 right-0 w-64 h-64 bg-sky-100/30 rounded-full blur-3xl pointer-events-none" />
 
       {/* Header */}
-      <div className="px-5 py-4 border-b flex justify-between items-center relative z-10 border-emerald-50/50 dark:border-slate-700/50 bg-gradient-to-br from-emerald-50/50 to-green-50/50 dark:from-slate-900/50 dark:to-slate-800/50">
+      <div className="px-5 py-4 border-b flex justify-between items-center relative z-10 border-sky-50/50 dark:border-slate-700/50 bg-gradient-to-br from-sky-50/50 to-sky-50/50 dark:from-slate-900/50 dark:to-slate-800/50">
         <div className="flex items-center gap-3">
           <div className="w-9 h-9 rounded-xl flex items-center justify-center bg-white/70 dark:bg-white/10">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" className="text-emerald-700 dark:text-emerald-400" strokeWidth="2">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" className="text-sky-700 dark:text-sky-400" strokeWidth="2">
               <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2"/>
               <rect x="9" y="3" width="6" height="4" rx="1"/>
               <path d="M9 12h6M9 16h4"/>
             </svg>
           </div>
           <div>
-            <h2 className="text-lg font-semibold text-emerald-900 dark:text-slate-200">{t("list_title")}</h2>
-            <p className="text-xs text-emerald-700 dark:text-slate-400">{items.length} {lang === "th" ? "รายการ" : "transactions"}</p>
+            <h2 className="text-lg font-semibold text-sky-900 dark:text-slate-200">{t("list_title")}</h2>
+            <p className="text-xs text-sky-700 dark:text-slate-400">{items.length} {lang === "th" ? "รายการ" : "transactions"}</p>
           </div>
         </div>
       </div>
@@ -104,29 +105,27 @@ export default function TransactionList({ items, onEdit, onDelete }) {
               <div key={dateKey}>
                 <DateHeader dateKey={dateKey} items={dayItems} locale={locale} lang={lang} />
                 <div className="space-y-2">
-                  {dayItems.map((tx) => (
+                  {dayItems.map((tx) => {
+                    const cat = getCategoryById(tx.category, tx.type);
+                    const cc = COLOR_CLASSES[cat.color];
+                    const CatIcon = cat.Icon;
+                    return (
                     <div key={tx.id} className="group relative">
                       <div className={`absolute inset-0 blur-2xl rounded-full opacity-0 transition-opacity duration-500 ${tx.type === "expense" ? "bg-rose-500/20 group-hover:opacity-100 dark:bg-rose-500/30" : "bg-emerald-500/20 group-hover:opacity-100 dark:bg-emerald-500/30"}`} />
                       <div className="relative overflow-hidden rounded-[20px] px-4 py-3 flex items-center gap-3 bg-white/70 dark:bg-slate-900/40 backdrop-blur-3xl shadow-sm hover:shadow-md border border-white dark:border-white/[0.05] transition-all duration-200">
 
-                        {/* Icon */}
-                        <div className={`w-11 h-11 shrink-0 rounded-xl flex items-center justify-center relative overflow-hidden ${tx.type === "expense" ? "bg-rose-100/60 dark:bg-rose-950/40 text-rose-600 dark:text-rose-400" : "bg-emerald-100/60 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400"}`}>
-                          <div className={`absolute inset-0 opacity-10 dark:opacity-20 ${tx.type === "expense" ? "bg-gradient-to-br from-rose-400 to-rose-600" : "bg-gradient-to-br from-emerald-400 to-emerald-600"}`} />
-                          {tx.type === "expense" ? (
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="relative z-10">
-                              <path strokeLinecap="round" strokeLinejoin="round" d="M5 10l7-7m0 0l7 7m-7-7v18" />
-                            </svg>
-                          ) : (
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="relative z-10">
-                              <path strokeLinecap="round" strokeLinejoin="round" d="M19 14l-7 7m0 0l-7-7m7 7V3" />
-                            </svg>
-                          )}
+                        {/* Category Icon */}
+                        <div className={`w-11 h-11 shrink-0 rounded-xl flex items-center justify-center ${cc.bg} ${cc.text}`}>
+                          <CatIcon size={20} />
                         </div>
 
                         {/* Info */}
                         <div className="flex-1 min-w-0">
                           <p className="text-[14px] font-extrabold truncate text-slate-800 dark:text-white">{tx.description}</p>
                           <div className="flex items-center gap-1.5 flex-wrap">
+                            <span className={`text-[10px] font-black tracking-wider px-1.5 py-0.5 rounded-md ${cc.bg} ${cc.text}`}>
+                              {t(cat.labelKey)}
+                            </span>
                             <span className={`text-[10px] font-black tracking-wider px-1.5 py-0.5 rounded-md ${tx.type === "expense" ? "bg-rose-100/80 dark:bg-rose-500/20 text-rose-700 dark:text-rose-400" : "bg-emerald-100/80 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-400"}`}>
                               {tx.type === "expense" ? t("list_expense_badge") : t("list_income_badge")}
                             </span>
@@ -155,7 +154,8 @@ export default function TransactionList({ items, onEdit, onDelete }) {
                         </div>
                       </div>
                     </div>
-                  ))}
+                    );
+                  })}
                 </div>
               </div>
             ))}
@@ -198,7 +198,11 @@ export default function TransactionList({ items, onEdit, onDelete }) {
                       </tr>
 
                       {/* Rows for this day */}
-                      {dayItems.map((tx) => (
+                      {dayItems.map((tx) => {
+                        const cat = getCategoryById(tx.category, tx.type);
+                        const cc = COLOR_CLASSES[cat.color];
+                        const CatIcon = cat.Icon;
+                        return (
                         <tr key={tx.id} className="group bg-white/70 hover:bg-white dark:bg-slate-900/40 dark:hover:bg-slate-800/80 transition-all duration-200 shadow-sm hover:shadow-lg dark:shadow-none">
                           <td className="px-5 py-3 first:rounded-l-2xl last:rounded-r-2xl border-y border-l border-white/60 dark:border-white/[0.05]">
                             <div className="flex items-center justify-center gap-2 opacity-60 group-hover:opacity-100 transition-opacity">
@@ -218,15 +222,13 @@ export default function TransactionList({ items, onEdit, onDelete }) {
                           </td>
                           <td className="px-5 py-3 border-y border-white/60 dark:border-white/[0.05]">
                             <div className="flex items-center gap-3">
-                              <div className={`w-9 h-9 shrink-0 rounded-xl flex items-center justify-center relative overflow-hidden ${tx.type === "expense" ? "bg-rose-100/60 dark:bg-rose-950/40 text-rose-500 dark:text-rose-400" : "bg-emerald-100/60 dark:bg-emerald-950/40 text-emerald-500 dark:text-emerald-400"}`}>
-                                <div className={`absolute inset-0 opacity-10 ${tx.type === "expense" ? "bg-gradient-to-br from-rose-400 to-rose-600" : "bg-gradient-to-br from-emerald-400 to-emerald-600"}`} />
-                                {tx.type === "expense" ? (
-                                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="relative z-10"><path strokeLinecap="round" strokeLinejoin="round" d="M5 10l7-7m0 0l7 7m-7-7v18" /></svg>
-                                ) : (
-                                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="relative z-10"><path strokeLinecap="round" strokeLinejoin="round" d="M19 14l-7 7m0 0l-7-7m7 7V3" /></svg>
-                                )}
+                              <div className={`w-9 h-9 shrink-0 rounded-xl flex items-center justify-center ${cc.bg} ${cc.text}`}>
+                                <CatIcon size={16} />
                               </div>
-                              <span className="font-extrabold text-[15px] text-slate-800 dark:text-white">{tx.description}</span>
+                              <div className="flex flex-col min-w-0">
+                                <span className="font-extrabold text-[15px] text-slate-800 dark:text-white truncate">{tx.description}</span>
+                                <span className={`text-[10px] font-black tracking-wider uppercase ${cc.text}`}>{t(cat.labelKey)}</span>
+                              </div>
                             </div>
                           </td>
                           <td className="px-5 py-3 text-center first:rounded-l-2xl last:rounded-r-2xl border-y border-r border-white/60 dark:border-white/[0.05]">
@@ -242,7 +244,8 @@ export default function TransactionList({ items, onEdit, onDelete }) {
                             </div>
                           </td>
                         </tr>
-                      ))}
+                        );
+                      })}
                     </Fragment>
                   );
                 })}
@@ -262,7 +265,7 @@ export default function TransactionList({ items, onEdit, onDelete }) {
             <button
               onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
               disabled={currentPage === 1}
-              className="px-3 py-1.5 rounded-lg text-sm font-medium disabled:opacity-40 bg-emerald-50 dark:bg-emerald-900/20 text-emerald-900 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800/50"
+              className="px-3 py-1.5 rounded-lg text-sm font-medium disabled:opacity-40 bg-sky-50 dark:bg-sky-900/20 text-sky-900 dark:text-sky-300 border border-sky-200 dark:border-sky-800/50"
             >
               <span className="hidden sm:inline">{t("list_prev")}</span>
               <span className="sm:hidden">←</span>
@@ -277,7 +280,7 @@ export default function TransactionList({ items, onEdit, onDelete }) {
                   onClick={() => setCurrentPage(i)}
                   className={`px-3 py-1.5 rounded-lg text-sm font-medium border ${
                     currentPage === i
-                      ? "bg-emerald-700 dark:bg-emerald-500/60 text-white border-transparent shadow-[0_2px_8px_rgba(14,116,144,0.35)]"
+                      ? "bg-sky-700 dark:bg-sky-500/60 text-white border-transparent shadow-[0_2px_8px_rgba(14,116,144,0.35)]"
                       : "bg-gray-100 dark:bg-slate-800/50 text-gray-500 dark:text-slate-400 border-gray-200 dark:border-white/10"
                   }`}
                 >
@@ -288,7 +291,7 @@ export default function TransactionList({ items, onEdit, onDelete }) {
             <button
               onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
               disabled={currentPage === totalPages}
-              className="px-3 py-1.5 rounded-lg text-sm font-medium disabled:opacity-40 bg-emerald-50 dark:bg-emerald-900/20 text-emerald-900 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800/50"
+              className="px-3 py-1.5 rounded-lg text-sm font-medium disabled:opacity-40 bg-sky-50 dark:bg-sky-900/20 text-sky-900 dark:text-sky-300 border border-sky-200 dark:border-sky-800/50"
             >
               <span className="hidden sm:inline">{t("list_next")}</span>
               <span className="sm:hidden">→</span>
