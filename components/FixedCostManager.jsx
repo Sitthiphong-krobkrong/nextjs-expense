@@ -259,7 +259,7 @@ export default function FixedCostManager() {
 
           {/* Amount */}
           <div className="mb-4">
-            <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-1.5 uppercase tracking-wide">{t("form_amount")}</label>
+            <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-1.5 uppercase tracking-wide">{t("form_amount")} <span className="text-rose-500 normal-case">*</span></label>
             <input
               type="number" min="0" value={form.amount}
               onChange={(e) => setForm((f) => ({ ...f, amount: e.target.value }))}
@@ -270,7 +270,7 @@ export default function FixedCostManager() {
 
           {/* Description */}
           <div className="mb-4">
-            <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-1.5 uppercase tracking-wide">{t("form_description")}</label>
+            <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-1.5 uppercase tracking-wide">{t("form_description")} <span className="text-rose-500 normal-case">*</span></label>
             <input
               type="text" value={form.description}
               onChange={(e) => setForm((f) => ({ ...f, description: e.target.value }))}
@@ -322,7 +322,7 @@ export default function FixedCostManager() {
 
           {/* Start date */}
           <div className="mb-6">
-            <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-1.5 uppercase tracking-wide">{t("fixed_start_date")}</label>
+            <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-1.5 uppercase tracking-wide">{t("fixed_start_date")} <span className="text-rose-500 normal-case">*</span></label>
             <input
               type="date" value={form.startDate}
               onChange={(e) => setForm((f) => ({ ...f, startDate: e.target.value }))}

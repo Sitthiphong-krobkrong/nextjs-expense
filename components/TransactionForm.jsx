@@ -276,7 +276,7 @@ export default function TransactionForm({ onSave, editing, onCancel, onNavigateH
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
             {/* Amount */}
             <div className="relative">
-              <label className="block text-sm font-bold mb-1.5 ml-1 text-gray-700 dark:text-slate-300">{t("form_amount")}</label>
+              <label className="block text-sm font-bold mb-1.5 ml-1 text-gray-700 dark:text-slate-300">{t("form_amount")} <span className="text-rose-500">*</span></label>
               <div className="relative">
                 <input
                   type="number"
@@ -304,7 +304,7 @@ export default function TransactionForm({ onSave, editing, onCancel, onNavigateH
 
             {/* Date */}
             <div className="relative">
-              <label className="block text-sm font-bold mb-1.5 ml-1 text-gray-700 dark:text-slate-300">{t("form_date")}</label>
+              <label className="block text-sm font-bold mb-1.5 ml-1 text-gray-700 dark:text-slate-300">{t("form_date")} <span className="text-rose-500">*</span></label>
               <input
                 type="date"
                 value={date}
@@ -331,7 +331,7 @@ export default function TransactionForm({ onSave, editing, onCancel, onNavigateH
 
             {/* Description */}
             <div className="relative">
-              <label className="block text-sm font-bold mb-1.5 ml-1 text-gray-700 dark:text-slate-300">{t("form_description")}</label>              <div className="relative">
+              <label className="block text-sm font-bold mb-1.5 ml-1 text-gray-700 dark:text-slate-300">{t("form_description")} <span className="text-rose-500">*</span></label>              <div className="relative">
                 <input
                   type="text"
                   value={description}
