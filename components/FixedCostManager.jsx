@@ -11,7 +11,7 @@ import {
 import { loadTransactions, addTransactionsBatch } from "../services/transactionService";
 import Swal from "sweetalert2";
 import { useLang } from "../app/hooks/useLanguage";
-import { getCategoriesForType, defaultCategoryFor, COLOR_CLASSES } from "../lib/categories";
+import { getCategoriesForType, getCategoryById, defaultCategoryFor, COLOR_CLASSES } from "../lib/categories";
 
 const EMPTY_FORM = {
   description: "",

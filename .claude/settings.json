@@ -4,7 +4,18 @@
       "Bash(git add *)",
       "Bash(git commit -m ' *)",
       "Bash(git push *)",
-      "Bash(xargs ls -la)"
+      "Bash(xargs ls -la)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://localhost:3099/)",
+      "WebFetch(domain:localhost)",
+      "Bash(curl -s http://localhost:3099/)",
+      "Bash(pkill -f \"next dev --port 3099\")",
+      "Bash(curl -s http://localhost:3000/add)",
+      "Bash(npx next *)",
+      "Bash(xargs ls)",
+      "Bash(curl -s \"http://localhost:3000/add\")",
+      "Bash(node -e ' *)",
+      "Bash(npx --yes puppeteer@latest --version)",
+      "Read(//Users/stp/.npm/_npx/**)"
     ]
   }
 }

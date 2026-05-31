@@ -62,11 +62,13 @@ export default function TransactionList({ items, onEdit, onDelete }) {
   const q = search.trim().toLowerCase();
   const min = minAmt !== "" ? parseFloat(minAmt) : null;
   const max = maxAmt !== "" ? parseFloat(maxAmt) : null;
-  const filteredItems = items
-    .filter((tx) => typeFilter === "all" || tx.type === typeFilter)
-    .filter((tx) => !q || tx.description?.toLowerCase().includes(q))
-    .filter((tx) => min === null || tx.amount >= min)
-    .filter((tx) => max === null || tx.amount <= max);
+  const filteredItems = useMemo(() =>
+    items
+      .filter((tx) => typeFilter === "all" || tx.type === typeFilter)
+      .filter((tx) => !q || tx.description?.toLowerCase().includes(q))
+      .filter((tx) => min === null || tx.amount >= min)
+      .filter((tx) => max === null || tx.amount <= max),
+  [items, typeFilter, q, min, max]);
 
   useEffect(() => { setCurrentPage(1); }, [filteredItems]);
 

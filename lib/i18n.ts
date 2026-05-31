@@ -35,6 +35,7 @@ export const translations = {
     dash_no_data: "ไม่มีข้อมูล",
     dash_view_all: "ทั้งหมด",
     dash_view_month: "เดือนนี้",
+    dash_carryover: "ยอดสะสมเดือนก่อน",
 
     // TransactionForm
     form_add: "เพิ่มรายการใหม่",
@@ -231,6 +232,7 @@ export const translations = {
     dash_no_data: "No data",
     dash_view_all: "All Time",
     dash_view_month: "This Month",
+    dash_carryover: "from prev. months",
 
     // TransactionForm
     form_add: "Add New Transaction",
