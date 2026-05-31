@@ -63,7 +63,7 @@ function UpcomingSection({ lang, t }) {
             </div>
             <div className="flex items-center gap-2 shrink-0">
               <span className={`text-sm font-black ${fc.type === "income" ? "text-emerald-600 dark:text-emerald-400" : "text-rose-600 dark:text-rose-400"}`}>
-                {fc.type === "income" ? "+" : "-"}{fc.amount.toLocaleString()}฿
+                {fc.type === "income" ? "+" : "-"}{(fc.amount ?? 0).toLocaleString()}฿
               </span>
               <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full ${
                 fc.daysLeft === 0

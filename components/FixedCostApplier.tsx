@@ -15,27 +15,31 @@ export default function FixedCostApplier() {
   const pathname = usePathname();
 
   useEffect(() => {
-    const d = new Date();
-    const todayKey = `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;
-    if (checkedDateRef.current === todayKey) return;
-    checkedDateRef.current = todayKey;
+    try {
+      const d = new Date();
+      const todayKey = `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;
+      if (checkedDateRef.current === todayKey) return;
+      checkedDateRef.current = todayKey;
 
-    const fixedCosts = loadFixedCosts();
-    if (!fixedCosts.length) return;
+      const fixedCosts = loadFixedCosts();
+      if (!fixedCosts.length) return;
 
-    const { applied } = applyDueFixedCosts(fixedCosts);
-    if (!applied.length) return;
+      const { applied } = applyDueFixedCosts(fixedCosts);
+      if (!applied.length) return;
 
-    addTransactionsBatch(applied, loadTransactions());
-    window.dispatchEvent(new Event("transactions-updated"));
+      addTransactionsBatch(applied, loadTransactions());
+      window.dispatchEvent(new Event("transactions-updated"));
 
-    Swal.fire({
-      title: t("swal_fixed_applied_title"),
-      text: `${applied.length} ${t("swal_fixed_applied_text")}`,
-      icon: "info",
-      timer: 2500,
-      showConfirmButton: false,
-    });
+      Swal.fire({
+        title: t("swal_fixed_applied_title"),
+        text: `${applied.length} ${t("swal_fixed_applied_text")}`,
+        icon: "info",
+        timer: 2500,
+        showConfirmButton: false,
+      });
+    } catch (err) {
+      console.error("[FixedCostApplier] failed to apply fixed costs:", err);
+    }
   }, [pathname, t]);
 
   return null;

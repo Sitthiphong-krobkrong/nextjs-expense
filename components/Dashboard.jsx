@@ -50,9 +50,22 @@ export default function Dashboard({ transactions, filteredTransactions, viewMode
 
   const scopedTransactions = filteredTransactions ?? transactions;
 
+  const currentMonthKey = useMemo(() => {
+    const now = new Date();
+    return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
+  }, [transactions]);
+
+  const carryOver = useMemo(() => {
+    if (viewMode !== "month") return 0;
+    return transactions
+      .filter((tx) => tx.date && !tx.date.startsWith(currentMonthKey))
+      .reduce((sum, tx) => sum + (tx.type === "income" ? tx.amount : -tx.amount), 0);
+  }, [transactions, viewMode, currentMonthKey]);
+
   const income = scopedTransactions.filter((t) => t.type === "income").reduce((sum, t) => sum + t.amount, 0);
   const expense = scopedTransactions.filter((t) => t.type === "expense").reduce((sum, t) => sum + t.amount, 0);
-  const balance = income - expense;
+  const currentMonthBalance = income - expense;
+  const balance = currentMonthBalance + (viewMode === "month" ? carryOver : 0);
 
   const hasData = income > 0 || expense > 0;
 
@@ -81,7 +94,7 @@ export default function Dashboard({ transactions, filteredTransactions, viewMode
   const pieData = useMemo(() => ({
     labels: [t("dash_income_label"), t("dash_expense_label"), t("dash_balance_label")],
     datasets: [{
-      data: hasData ? [income, expense, Math.max(balance, 0)] : [1, 1, 1],
+      data: hasData ? [income, expense, Math.max(currentMonthBalance, 0)] : [1, 1, 1],
       backgroundColor: hasData
         ? ["#34d399", "#f87171", "#60a5fa"]
         : [isDark ? "#1e293b" : "#f1f5f9", isDark ? "#1e293b" : "#f1f5f9", isDark ? "#1e293b" : "#f1f5f9"],
@@ -132,6 +145,7 @@ export default function Dashboard({ transactions, filteredTransactions, viewMode
       value: balance,
       show: showBalance,
       toggle: () => setShowBalance((p) => !p),
+      prevBalance: viewMode === "month" && carryOver !== 0 ? carryOver : null,
       containerClass: "bg-gradient-to-br from-blue-100 to-blue-200 dark:from-blue-900/40 dark:to-blue-800/40 shadow-blue-500/20 border-blue-500/30",
       textColor: "text-blue-900 dark:text-blue-300",
       accentColor: "#3b82f6",
@@ -230,7 +244,7 @@ export default function Dashboard({ transactions, filteredTransactions, viewMode
 
       {/* Stat Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-5 mb-8">
-        {statCards.map(({ label, value, show, toggle, containerClass, textColor, accentColor, icon }) => (
+        {statCards.map(({ label, value, show, toggle, containerClass, textColor, accentColor, icon, prevBalance }) => (
           <div
             key={label}
             className={`rounded-3xl p-6 relative overflow-hidden group hover:-translate-y-1 transition-transform duration-300 backdrop-blur-md shadow-lg border ${containerClass}`}
@@ -267,6 +281,11 @@ export default function Dashboard({ transactions, filteredTransactions, viewMode
               {show ? value.toLocaleString() : "••••••"}{" "}
               <span className="text-lg opacity-80">{show ? "฿" : ""}</span>
             </p>
+            {prevBalance != null && show && (
+              <p className={`text-xs mt-1 font-medium opacity-70 relative z-10 ${textColor}`}>
+                {prevBalance >= 0 ? "+" : ""}{prevBalance.toLocaleString()} ฿ {t("dash_carryover")}
+              </p>
+            )}
           </div>
         ))}
       </div>
