@@ -1,10 +1,13 @@
 "use client";
 import { useMemo, useState, useEffect } from "react";
 import { useTheme } from "next-themes";
+import Link from "next/link";
 import { useLang } from "../app/hooks/useLanguage";
 import { getCategoryById, COLOR_CLASSES } from "../lib/categories";
+import { loadFixedCosts } from "../services/fixedCostService";
 
-const DAY_LABELS = ["อา", "จ", "อ", "พ", "พฤ", "ศ", "ส"];
+const DAY_LABELS_TH = ["อา", "จ", "อ", "พ", "พฤ", "ศ", "ส"];
+const DAY_LABELS_EN = ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"];
 
 function getMonthGrid(year, month) {
   const firstDay = new Date(year, month, 1).getDay();
@@ -32,6 +35,7 @@ export default function ExpenseCalendar({ transactions }) {
   useEffect(() => setMounted(true), []);
   const isDark = mounted && resolvedTheme === "dark";
   const { t, lang } = useLang();
+  const DAY_LABELS = lang === "th" ? DAY_LABELS_TH : DAY_LABELS_EN;
 
   const today = new Date();
   const [viewYear, setViewYear] = useState(today.getFullYear());
@@ -39,6 +43,12 @@ export default function ExpenseCalendar({ transactions }) {
   const [selectedDay, setSelectedDay] = useState(null);
   const [viewMode, setViewMode] = useState("daily");
   const [expandedWeek, setExpandedWeek] = useState(null);
+
+  // reset เมื่อสลับ viewMode
+  useEffect(() => {
+    setSelectedDay(null);
+    setExpandedWeek(null);
+  }, [viewMode]);
 
   // Build daily map
   const dailyMap = useMemo(() => {
@@ -57,6 +67,33 @@ export default function ExpenseCalendar({ transactions }) {
   }, [transactions, viewYear, viewMonth]);
 
   const weeks = useMemo(() => getMonthGrid(viewYear, viewMonth), [viewYear, viewMonth]);
+
+  // Fixed cost scheduled days for current month
+  const [fixedCosts, setFixedCosts] = useState(() => loadFixedCosts());
+  useEffect(() => {
+    const sync = () => setFixedCosts(loadFixedCosts());
+    window.addEventListener("transactions-updated", sync);
+    return () => window.removeEventListener("transactions-updated", sync);
+  }, []);
+
+  const fixedCostDays = useMemo(() => {
+    const map = {};
+    fixedCosts.filter((fc) => fc.isActive).forEach((fc) => {
+      if (fc.frequency === "monthly") {
+        const lastDay = new Date(viewYear, viewMonth + 1, 0).getDate();
+        const day = Math.min(fc.dayOfMonth, lastDay);
+        if (!map[day]) map[day] = [];
+        map[day].push(fc);
+      } else if (fc.frequency === "yearly") {
+        const start = new Date(fc.startDate);
+        if (start.getMonth() === viewMonth) {
+          if (!map[start.getDate()]) map[start.getDate()] = [];
+          map[start.getDate()].push(fc);
+        }
+      }
+    });
+    return map;
+  }, [fixedCosts, viewYear, viewMonth]);
 
   const weeklySummary = useMemo(() => {
     return weeks.map((week) => {
@@ -97,6 +134,7 @@ export default function ExpenseCalendar({ transactions }) {
     setViewMonth(m);
     setViewYear(y);
     setSelectedDay(null);
+    setExpandedWeek(null);
   };
 
   const goToToday = () => {
@@ -185,54 +223,81 @@ export default function ExpenseCalendar({ transactions }) {
         </div>
       </div>
 
-      {/* ── Month navigation ── */}
-      <div className="px-5 sm:px-6 py-4 flex items-center justify-between">
-        <button
-          onClick={() => navigateMonth(-1)}
-          className="w-10 h-10 rounded-xl flex items-center justify-center hover:bg-sky-100 dark:hover:bg-sky-900/30 transition-colors text-sky-600 dark:text-sky-400"
-          aria-label="เดือนก่อน"
-        >
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-            <polyline points="15 18 9 12 15 6" />
-          </svg>
-        </button>
+      {/* ── Month + Year navigation ── */}
+      <div className="px-5 sm:px-6 py-3 flex items-center justify-between gap-2">
+        {/* Prev year + Prev month */}
+        <div className="flex items-center gap-1">
+          <button
+            onClick={() => { setViewYear((y) => y - 1); setSelectedDay(null); setExpandedWeek(null); }}
+            className="w-8 h-8 rounded-lg flex items-center justify-center hover:bg-sky-100 dark:hover:bg-sky-900/30 transition-colors text-sky-400 dark:text-sky-500 text-xs font-black"
+            aria-label="ปีก่อน"
+          >«</button>
+          <button
+            onClick={() => navigateMonth(-1)}
+            className="w-9 h-9 rounded-xl flex items-center justify-center hover:bg-sky-100 dark:hover:bg-sky-900/30 transition-colors text-sky-600 dark:text-sky-400"
+            aria-label="เดือนก่อน"
+          >
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+          </button>
+        </div>
 
-        <div className="flex items-center gap-3">
-          <span className="text-lg font-extrabold text-slate-800 dark:text-slate-100 tracking-wide">{monthLabel}</span>
+        {/* Month label + today */}
+        <div className="flex items-center gap-2 flex-1 justify-center">
+          <span className="text-base font-extrabold text-slate-800 dark:text-slate-100 tracking-wide text-center">{monthLabel}</span>
           <button
             onClick={goToToday}
-            className="text-[11px] font-bold px-3 py-1.5 rounded-lg bg-sky-100 dark:bg-sky-900/30 text-sky-600 dark:text-sky-300 hover:bg-sky-200 dark:hover:bg-sky-800/40 transition-colors border border-sky-200/50 dark:border-sky-700/30"
+            className="text-[11px] font-bold px-2.5 py-1 rounded-lg bg-sky-100 dark:bg-sky-900/30 text-sky-600 dark:text-sky-300 hover:bg-sky-200 dark:hover:bg-sky-800/40 transition-colors border border-sky-200/50 dark:border-sky-700/30 shrink-0"
           >
             {t("cal_today")}
           </button>
         </div>
 
-        <button
-          onClick={() => navigateMonth(1)}
-          className="w-10 h-10 rounded-xl flex items-center justify-center hover:bg-sky-100 dark:hover:bg-sky-900/30 transition-colors text-sky-600 dark:text-sky-400"
-          aria-label="เดือนถัดไป"
-        >
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-            <polyline points="9 18 15 12 9 6" />
-          </svg>
-        </button>
+        {/* Next month + Next year */}
+        <div className="flex items-center gap-1">
+          <button
+            onClick={() => navigateMonth(1)}
+            className="w-9 h-9 rounded-xl flex items-center justify-center hover:bg-sky-100 dark:hover:bg-sky-900/30 transition-colors text-sky-600 dark:text-sky-400"
+            aria-label="เดือนถัดไป"
+          >
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+          </button>
+          <button
+            onClick={() => { setViewYear((y) => y + 1); setSelectedDay(null); setExpandedWeek(null); }}
+            className="w-8 h-8 rounded-lg flex items-center justify-center hover:bg-sky-100 dark:hover:bg-sky-900/30 transition-colors text-sky-400 dark:text-sky-500 text-xs font-black"
+            aria-label="ปีถัดไป"
+          >»</button>
+        </div>
       </div>
 
       {/* ── Monthly summary ── */}
-      <div className="px-5 sm:px-6 pb-4 grid grid-cols-2 gap-3">
-        <div className="rounded-2xl py-3 px-4 bg-emerald-50/80 dark:bg-emerald-900/20 border border-emerald-200/50 dark:border-emerald-700/30">
-          <p className="text-[11px] font-bold text-emerald-600 dark:text-emerald-400 mb-1 flex items-center gap-1">
-            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M12 19V5M5 12l7 7 7-7"/></svg>{t("cal_income_month")}
-          </p>
-          <p className="text-lg font-extrabold text-emerald-700 dark:text-emerald-300">+{monthTotal.income.toLocaleString()} <span className="text-sm">฿</span></p>
-        </div>
-        <div className="rounded-2xl py-3 px-4 bg-rose-50/80 dark:bg-rose-900/20 border border-rose-200/50 dark:border-rose-700/30">
-          <p className="text-[11px] font-bold text-rose-500 dark:text-rose-400 mb-1 flex items-center gap-1">
-            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M12 5v14M5 12l7-7 7 7"/></svg>{t("cal_expense_month")}
-          </p>
-          <p className="text-lg font-extrabold text-rose-700 dark:text-rose-300">-{monthTotal.expense.toLocaleString()} <span className="text-sm">฿</span></p>
-        </div>
-      </div>
+      {(() => {
+        const net = monthTotal.income - monthTotal.expense;
+        return (
+          <div className="px-5 sm:px-6 pb-4 grid grid-cols-3 gap-2">
+            <div className="rounded-2xl py-3 px-3 bg-emerald-50/80 dark:bg-emerald-900/20 border border-emerald-200/50 dark:border-emerald-700/30">
+              <p className="text-[10px] font-bold text-emerald-600 dark:text-emerald-400 mb-1 flex items-center gap-1">
+                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M12 19V5M5 12l7 7 7-7"/></svg>{t("cal_income_month")}
+              </p>
+              <p className="text-sm font-extrabold text-emerald-700 dark:text-emerald-300 whitespace-nowrap">+{shortAmount(Math.round(monthTotal.income))} <span className="text-xs">฿</span></p>
+            </div>
+            <div className="rounded-2xl py-3 px-3 bg-rose-50/80 dark:bg-rose-900/20 border border-rose-200/50 dark:border-rose-700/30">
+              <p className="text-[10px] font-bold text-rose-500 dark:text-rose-400 mb-1 flex items-center gap-1">
+                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M12 5v14M5 12l7-7 7 7"/></svg>{t("cal_expense_month")}
+              </p>
+              <p className="text-sm font-extrabold text-rose-700 dark:text-rose-300 whitespace-nowrap">-{shortAmount(Math.round(monthTotal.expense))} <span className="text-xs">฿</span></p>
+            </div>
+            <div className={`rounded-2xl py-3 px-3 border ${net >= 0 ? "bg-sky-50/80 dark:bg-sky-900/20 border-sky-200/50 dark:border-sky-700/30" : "bg-amber-50/80 dark:bg-amber-900/20 border-amber-200/50 dark:border-amber-700/30"}`}>
+              <p className={`text-[10px] font-bold mb-1 flex items-center gap-1 ${net >= 0 ? "text-sky-600 dark:text-sky-400" : "text-amber-600 dark:text-amber-400"}`}>
+                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+                {lang === "th" ? "คงเหลือ" : "Balance"}
+              </p>
+              <p className={`text-sm font-extrabold whitespace-nowrap ${net >= 0 ? "text-sky-700 dark:text-sky-300" : "text-amber-700 dark:text-amber-300"}`}>
+                {net >= 0 ? "+" : "-"}{shortAmount(Math.round(Math.abs(net)))} <span className="text-xs">฿</span>
+              </p>
+            </div>
+          </div>
+        );
+      })()}
 
       {/* ══════════ DAILY VIEW ══════════ */}
       {viewMode === "daily" ? (
@@ -296,13 +361,15 @@ export default function ExpenseCalendar({ transactions }) {
                             {day}
                           </span>
 
-                          {/* Mobile: colored dots only */}
-                          {hasData && (
-                            <div className="flex gap-1 mt-auto mb-0.5 sm:hidden">
-                              {data.expense > 0 && <span className="w-2 h-2 rounded-full bg-rose-500" />}
-                              {data.income > 0 && <span className="w-2 h-2 rounded-full bg-emerald-500" />}
-                            </div>
-                          )}
+                          {/* Mobile: dots + count */}
+                          <div className="flex gap-0.5 mt-auto mb-0.5 sm:hidden items-center flex-wrap justify-center">
+                            {hasData && data.expense > 0 && <span className="w-1.5 h-1.5 rounded-full bg-rose-500" />}
+                            {hasData && data.income > 0 && <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />}
+                            {hasData && <span className="text-[8px] font-black text-slate-400 leading-none">{data.items.length}</span>}
+                            {fixedCostDays[day] && !hasData && (
+                              <span className="w-1.5 h-1.5 rounded-full bg-violet-400" />
+                            )}
+                          </div>
 
                           {/* Desktop: amount pills */}
                           {hasData && (
@@ -330,6 +397,18 @@ export default function ExpenseCalendar({ transactions }) {
                               <span className="flex items-center justify-center w-4 h-4 text-[8px] font-black rounded-full bg-sky-500 text-white shadow-sm">
                                 {data.items.length}
                               </span>
+                            </div>
+                          )}
+
+                          {/* Fixed cost dot — bottom left */}
+                          {fixedCostDays[day] && (
+                            <div className="absolute bottom-1 left-1 flex gap-0.5">
+                              {fixedCostDays[day].some(fc => fc.type === "expense") && (
+                                <span className="w-1.5 h-1.5 rounded-full bg-violet-500" title="fixed expense" />
+                              )}
+                              {fixedCostDays[day].some(fc => fc.type === "income") && (
+                                <span className="w-1.5 h-1.5 rounded-full bg-violet-300" title="fixed income" />
+                              )}
                             </div>
                           )}
                         </>
@@ -385,7 +464,7 @@ export default function ExpenseCalendar({ transactions }) {
             const weekItems = week
               .filter(Boolean)
               .flatMap((day) => (dailyMap[day] ? dailyMap[day].items.map((tx) => ({ ...tx, day })) : []))
-              .sort((a, b) => new Date(b.date) - new Date(a.date));
+              .sort((a, b) => b.id - a.id);
 
             return (
               <div
@@ -529,16 +608,27 @@ export default function ExpenseCalendar({ transactions }) {
                 month: "long",
               })}
             </h3>
-            <button
-              onClick={() => setSelectedDay(null)}
-              className="w-8 h-8 rounded-xl flex items-center justify-center hover:bg-sky-100 dark:hover:bg-sky-900/30 transition-colors text-slate-400 dark:text-slate-500"
-              aria-label="ปิด"
-            >
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
-                <line x1="18" y1="6" x2="6" y2="18" />
-                <line x1="6" y1="6" x2="18" y2="18" />
-              </svg>
-            </button>
+            <div className="flex items-center gap-2">
+              {/* Quick-add button */}
+              <Link
+                href={`/add?date=${viewYear}-${String(viewMonth + 1).padStart(2, "0")}-${String(selectedDay).padStart(2, "0")}`}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold text-white transition-transform hover:-translate-y-0.5"
+                style={{ background: "linear-gradient(135deg, #0284c7, #075985)", boxShadow: "0 4px 10px rgba(2,132,199,0.3)" }}
+              >
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M12 5v14M5 12h14"/></svg>
+                {lang === "th" ? "เพิ่ม" : "Add"}
+              </Link>
+              <button
+                onClick={() => setSelectedDay(null)}
+                className="w-8 h-8 rounded-xl flex items-center justify-center hover:bg-sky-100 dark:hover:bg-sky-900/30 transition-colors text-slate-400 dark:text-slate-500"
+                aria-label="ปิด"
+              >
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                  <line x1="18" y1="6" x2="6" y2="18" />
+                  <line x1="6" y1="6" x2="18" y2="18" />
+                </svg>
+              </button>
+            </div>
           </div>
 
           {/* Day summary badges */}
@@ -560,9 +650,9 @@ export default function ExpenseCalendar({ transactions }) {
 
           {/* Transactions list */}
           <div className="space-y-2 max-h-60 overflow-y-auto pr-1">
-            {selectedDayData.items
-              .sort((a, b) => new Date(b.date) - new Date(a.date))
-              .map((tx) => {
+            {[...selectedDayData.items]
+              .sort((a, b) => b.id - a.id)
+              .map((tx, idx) => {
                 const cat = getCategoryById(tx.category, tx.type);
                 const cc = COLOR_CLASSES[cat.color];
                 const CatIcon = cat.Icon;
@@ -578,7 +668,7 @@ export default function ExpenseCalendar({ transactions }) {
                     <p className="text-sm font-bold text-slate-800 dark:text-slate-200 truncate">{tx.description}</p>
                     <div className="flex items-center gap-1.5 mt-0.5 flex-wrap">
                       <p className="text-xs text-slate-400 dark:text-slate-500">
-                        {new Date(tx.date).toLocaleTimeString("th-TH", { hour: "2-digit", minute: "2-digit" })} น.
+                        #{idx + 1}
                       </p>
                       <span className={`text-[9px] font-black tracking-wider px-1.5 py-0.5 rounded-md ${cc.bg} ${cc.text}`}>
                         {t(cat.labelKey)}

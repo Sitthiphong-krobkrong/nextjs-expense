@@ -11,7 +11,7 @@ export default function DelayedLoader({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     setReady(false);
-    const t = setTimeout(() => setReady(true), 800);
+    const t = setTimeout(() => setReady(true), 150);
     return () => clearTimeout(t);
   }, [pathname]);
 

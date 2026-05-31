@@ -5,12 +5,14 @@ import useSpeechRecognition from "../app/hooks/useSpeechRecognition";
 import { useLang } from "../app/hooks/useLanguage";
 import { getCategoriesForType, defaultCategoryFor, COLOR_CLASSES } from "../lib/categories";
 
-export default function TransactionForm({ onSave, editing, onCancel, onNavigateHome }) {
+export default function TransactionForm({ onSave, editing, onCancel, onNavigateHome, defaultDate }) {
   const [description, setDescription] = useState("");
   const [amount, setAmount] = useState("");
   const [type, setType] = useState("expense");
   const [category, setCategory] = useState(defaultCategoryFor("expense"));
+  const [note, setNote] = useState("");
   const [date, setDate] = useState(() => {
+    if (defaultDate) return defaultDate;
     const now = new Date();
     return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
   });
@@ -18,9 +20,9 @@ export default function TransactionForm({ onSave, editing, onCancel, onNavigateH
   const [loading, setLoading] = useState(false);
   const [showOverlay, setShowOverlay] = useState(false);
   const loadingTimeout = useRef();
-  const { t } = useLang();
+  const { t, lang } = useLang();
 
-  const { isListening, isSupported, error: speechError, startListening, stopListening } = useSpeechRecognition();
+  const { isListening, isSupported, error: speechError, startListening, stopListening } = useSpeechRecognition(lang);
 
   const handleVoiceInput = () => {
     if (isListening) {
@@ -52,10 +54,12 @@ export default function TransactionForm({ onSave, editing, onCancel, onNavigateH
       setType(editing.type);
       setCategory(editing.category || defaultCategoryFor(editing.type));
       setDate(editing.date ? editing.date.split("T")[0] : new Date().toLocaleDateString("en-CA"));
+      setNote(editing.note || "");
     } else {
-      setDate(new Date().toLocaleDateString("en-CA"));
+      setDate(defaultDate || new Date().toLocaleDateString("en-CA"));
+      setNote("");
     }
-  }, [editing]);
+  }, [editing, defaultDate]);
 
   // เปลี่ยน type → reset category เป็น default ของ type นั้น
   // (เว้นแต่ว่า current category อยู่ในกลุ่ม type ใหม่อยู่แล้ว — ซึ่งเป็นไปไม่ได้ในระบบนี้)
@@ -105,6 +109,7 @@ export default function TransactionForm({ onSave, editing, onCancel, onNavigateH
       type,
       category,
       date: `${date}T00:00:00.000`,
+      ...(note.trim() && { note: note.trim() }),
     };
     onSave(tx);
     setDescription("");
@@ -112,6 +117,7 @@ export default function TransactionForm({ onSave, editing, onCancel, onNavigateH
     setType("expense");
     setCategory(defaultCategoryFor("expense"));
     setDate(new Date().toLocaleDateString("en-CA"));
+    setNote("");
 
     // โหมดเพิ่มใหม่: ถาม "เพิ่มอีก" หรือ "กลับหน้าหลัก"
     // โหมดแก้ไข: success Swal ปกติ (ปล่อยให้ parent นำทาง)
@@ -305,6 +311,22 @@ export default function TransactionForm({ onSave, editing, onCancel, onNavigateH
                 onChange={(e) => setDate(e.target.value)}
                 className={`${inputClass} appearance-none w-full min-w-0`}
               />
+              {(() => {
+                if (!date) return null;
+                const now = new Date();
+                const currentMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
+                const selectedMonth = date.substring(0, 7);
+                if (selectedMonth <= currentMonth) return null;
+                return (
+                  <p className="mt-1.5 text-[11px] font-semibold text-amber-600 dark:text-amber-400 flex items-center gap-1">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="shrink-0">
+                      <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+                      <line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>
+                    </svg>
+                    วันที่นี้อยู่เดือนหน้า — จะไม่แสดงใน &quot;เดือนนี้&quot;
+                  </p>
+                );
+              })()}
             </div>
 
             {/* Description */}
@@ -332,6 +354,20 @@ export default function TransactionForm({ onSave, editing, onCancel, onNavigateH
                 )}
               </div>
             </div>
+        </div>
+
+        {/* Note (optional) */}
+        <div className="relative">
+          <label className="block text-sm font-bold mb-1.5 ml-1 text-gray-700 dark:text-slate-300">
+            {t("form_note")} <span className="text-slate-400 font-normal text-xs">({t("form_optional")})</span>
+          </label>
+          <input
+            type="text"
+            value={note}
+            onChange={(e) => setNote(e.target.value)}
+            placeholder={t("form_note_placeholder")}
+            className={inputClass}
+          />
         </div>
 
         {/* Actions */}

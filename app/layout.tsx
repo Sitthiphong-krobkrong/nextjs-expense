@@ -13,8 +13,11 @@ const kanit = Kanit({
   variable: '--font-kanit',      // if you want a CSS variable instead of className
 })
 export const metadata: Metadata = {
-  title: "next-expense",
-  description: "Web Application (Next.JS) Develop by sithiphong krobkrong",
+  title: "Expense Tracker",
+  description: "จัดการรายรับ-รายจ่ายส่วนตัว",
+  manifest: "/manifest.json",
+  appleWebApp: { capable: true, statusBarStyle: "default", title: "Expense Tracker" },
+  formatDetection: { telephone: false },
 };
 
 import { ThemeProvider } from "@/components/ThemeProvider";
@@ -34,7 +37,7 @@ export default function RootLayout({
           <LangProvider>
             <FixedCostApplier />
             <Navbar />
-            <div className="pb-16 sm:pb-0">
+            <div className="pb-16 md:pb-0">
               <DelayedLoader>{children}</DelayedLoader>
             </div>
             <Footer />

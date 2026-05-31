@@ -67,7 +67,7 @@ export default function BottomNav() {
   ];
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-50 sm:hidden border-t border-slate-200/60 dark:border-slate-700/60 bg-white/90 dark:bg-slate-900/90 backdrop-blur-md">
+    <nav className="fixed bottom-0 left-0 right-0 z-50 md:hidden border-t border-slate-200/60 dark:border-slate-700/60 bg-white/90 dark:bg-slate-900/90 backdrop-blur-md">
       <div className="flex items-stretch h-16 max-w-3xl mx-auto">
         {tabs.map(({ href, label, icon }) => {
           const active = pathname === href;

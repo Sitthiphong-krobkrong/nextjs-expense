@@ -6,6 +6,7 @@ import {
 } from "../../services/transactionService";
 import TransactionList from "../../components/TransactionList";
 import Dashboard from "../../components/Dashboard";
+import FinancialInsights from "../../components/FinancialInsights";
 import Swal from "sweetalert2";
 import { useLang } from "../hooks/useLanguage";
 import Link from "next/link";
@@ -20,7 +21,7 @@ export default function TransactionsPage() {
   const currentMonth = useMemo(() => {
     const now = new Date();
     return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
-  }, []);
+  }, [transactions]); // recompute เมื่อ transactions อัพเดท เพื่อให้ข้ามเดือนได้ถูก
 
   const filteredTransactions = useMemo(() => {
     if (viewMode === "all") return transactions;
@@ -96,6 +97,8 @@ export default function TransactionsPage() {
             {t("nav_add")}
           </Link>
         </div>
+
+        <FinancialInsights filteredTransactions={filteredTransactions} allTransactions={transactions} />
 
         <TransactionList
           items={filteredTransactions}

@@ -99,9 +99,10 @@ const BillsIcon = ({ size, className }: { size?: number; className?: string }) =
 
 const OtherIcon = ({ size, className }: { size?: number; className?: string }) => (
   <svg {...baseSvg(size, className)}>
-    <circle cx="12" cy="12" r="1" />
-    <circle cx="19" cy="12" r="1" />
-    <circle cx="5" cy="12" r="1" />
+    <rect x="3" y="3" width="7" height="7" rx="1" />
+    <rect x="14" y="3" width="7" height="7" rx="1" />
+    <rect x="3" y="14" width="7" height="7" rx="1" />
+    <rect x="14" y="14" width="7" height="7" rx="1" />
   </svg>
 );
 

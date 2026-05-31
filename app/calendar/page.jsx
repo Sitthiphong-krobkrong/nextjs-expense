@@ -1,11 +1,17 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { loadTransactions } from "../../services/transactionService";
 import ExpenseCalendar from "../../components/ExpenseCalendar";
 import { useLang } from "../hooks/useLanguage";
 
 export default function CalendarPage() {
-  const [transactions] = useState(() => loadTransactions());
+  const [transactions, setTransactions] = useState(() => loadTransactions());
+
+  useEffect(() => {
+    const refresh = () => setTransactions(loadTransactions());
+    window.addEventListener("transactions-updated", refresh);
+    return () => window.removeEventListener("transactions-updated", refresh);
+  }, []);
   const { t } = useLang();
 
   return (

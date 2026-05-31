@@ -96,9 +96,11 @@ export default function Dashboard({ transactions, filteredTransactions, viewMode
   const [showExpense, setShowExpense] = useState(false);
   const [showBalance, setShowBalance] = useState(false);
 
+  const isMonthView = viewMode === "month";
+
   const statCards = [
     {
-      label: t("dash_income"),
+      label: isMonthView ? t("dash_income_month") : t("dash_income"),
       value: income,
       show: showIncome,
       toggle: () => setShowIncome((p) => !p),
@@ -112,7 +114,7 @@ export default function Dashboard({ transactions, filteredTransactions, viewMode
       ),
     },
     {
-      label: t("dash_expense"),
+      label: isMonthView ? t("dash_expense_month") : t("dash_expense"),
       value: expense,
       show: showExpense,
       toggle: () => setShowExpense((p) => !p),
@@ -126,7 +128,7 @@ export default function Dashboard({ transactions, filteredTransactions, viewMode
       ),
     },
     {
-      label: t("dash_balance"),
+      label: isMonthView ? t("dash_balance_month") : t("dash_balance"),
       value: balance,
       show: showBalance,
       toggle: () => setShowBalance((p) => !p),
@@ -141,10 +143,7 @@ export default function Dashboard({ transactions, filteredTransactions, viewMode
     },
   ];
 
-  const centerColor = isDark ? "#e2e8f0" : "#1e293b";
   const centerSub = isDark ? "#64748b" : "#94a3b8";
-  const balanceLabel = balance >= 0 ? "ยอดคงเหลือ" : "ขาดทุน";
-  const balanceDisplay = `${balance >= 0 ? "+" : ""}${balance.toLocaleString()} ฿`;
 
   return (
     <>

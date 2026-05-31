@@ -124,6 +124,7 @@ export function applyDueFixedCosts(fixedCosts) {
           description: fc.description,
           amount: fc.amount,
           type: fc.type,
+          category: fc.category || (fc.type === 'income' ? 'other_income' : 'other_expense'),
           date: `${cy}-${m}-${d}T00:00:00.000`,
           isFixed: true,
         });
@@ -160,6 +161,7 @@ export function applyDueFixedCosts(fixedCosts) {
           description: fc.description,
           amount: fc.amount,
           type: fc.type,
+          category: fc.category || (fc.type === 'income' ? 'other_income' : 'other_expense'),
           date: `${cursor}-${m}-${d}T00:00:00.000`,
           isFixed: true,
         });

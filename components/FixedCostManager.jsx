@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   loadFixedCosts,
   addFixedCost,
@@ -11,14 +11,16 @@ import {
 import { loadTransactions, addTransactionsBatch } from "../services/transactionService";
 import Swal from "sweetalert2";
 import { useLang } from "../app/hooks/useLanguage";
+import { getCategoriesForType, defaultCategoryFor, COLOR_CLASSES } from "../lib/categories";
 
 const EMPTY_FORM = {
   description: "",
   amount: "",
   type: "expense",
+  category: defaultCategoryFor("expense"),
   frequency: "monthly",
   dayOfMonth: 1,
-  startDate: new Date().toISOString().substring(0, 10),
+  startDate: new Date().toLocaleDateString("en-CA"),
   isActive: true,
 };
 
@@ -29,8 +31,17 @@ export default function FixedCostManager() {
   const [form, setForm] = useState(EMPTY_FORM);
   const [editingId, setEditingId] = useState(null);
 
+  // Sync state when FixedCostApplier (in layout) applies costs and updates localStorage
+  useEffect(() => {
+    const sync = () => setFixedCosts(loadFixedCosts());
+    window.addEventListener("transactions-updated", sync);
+    return () => window.removeEventListener("transactions-updated", sync);
+  }, []);
+
+  const freshEmptyForm = () => ({ ...EMPTY_FORM, startDate: new Date().toLocaleDateString("en-CA") });
+
   const openAdd = () => {
-    setForm(EMPTY_FORM);
+    setForm(freshEmptyForm());
     setEditingId(null);
     setShowForm(true);
   };
@@ -40,6 +51,7 @@ export default function FixedCostManager() {
       description: fc.description,
       amount: String(fc.amount),
       type: fc.type,
+      category: fc.category || defaultCategoryFor(fc.type),
       frequency: fc.frequency,
       dayOfMonth: fc.dayOfMonth,
       startDate: fc.startDate,
@@ -54,7 +66,7 @@ export default function FixedCostManager() {
   const handleCancel = () => {
     setShowForm(false);
     setEditingId(null);
-    setForm(EMPTY_FORM);
+    setForm(freshEmptyForm());
   };
 
   const handleSave = async () => {
@@ -86,12 +98,17 @@ export default function FixedCostManager() {
     });
     if (!isConfirmed) return;
 
+    // Reload from localStorage to avoid overwriting lastApplied that FixedCostApplier may have just updated
+    const freshList = loadFixedCosts();
     const payload = { ...form, amount, dayOfMonth: Number(form.dayOfMonth) };
     let updatedList;
     if (editingId) {
-      updatedList = updateFixedCost({ ...payload, id: editingId }, fixedCosts);
+      // Preserve lastApplied from storage — don't let stale form value overwrite it
+      const freshItem = freshList.find((f) => f.id === editingId);
+      const safePayload = { ...payload, id: editingId, lastApplied: freshItem?.lastApplied ?? form.lastApplied };
+      updatedList = updateFixedCost(safePayload, freshList);
     } else {
-      updatedList = addFixedCost(payload, fixedCosts);
+      updatedList = addFixedCost(payload, freshList);
     }
 
     // Apply ทันทีหลัง save — ไม่ต้องรอกลับหน้าหลัก
@@ -134,13 +151,29 @@ export default function FixedCostManager() {
       cancelButtonColor: "#6b7280",
     });
     if (!isConfirmed) return;
-    setFixedCosts(deleteFixedCost(id, fixedCosts));
+    setFixedCosts(deleteFixedCost(id, loadFixedCosts()));
   };
 
   const appliedThisMonth = (fc) => {
-    if (fc.frequency === "monthly") return fc.lastApplied === new Date().toISOString().substring(0, 7);
-    if (fc.frequency === "yearly") return fc.lastApplied === String(new Date().getFullYear());
+    const now = new Date();
+    if (fc.frequency === "monthly") {
+      const localMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
+      return fc.lastApplied === localMonth;
+    }
+    if (fc.frequency === "yearly") return fc.lastApplied === String(now.getFullYear());
     return false;
+  };
+
+  const pendingLabel = (fc) => {
+    if (fc.frequency === "monthly")
+      return lang === "th" ? `รอวันที่ ${fc.dayOfMonth}` : `Due day ${fc.dayOfMonth}`;
+    if (fc.frequency === "yearly") {
+      const d = new Date(fc.startDate);
+      return lang === "th"
+        ? `รอ ${d.toLocaleDateString("th-TH", { month: "short", day: "numeric" })}`
+        : `Due ${d.toLocaleDateString("en-GB", { month: "short", day: "numeric" })}`;
+    }
+    return t("fixed_pending");
   };
 
   const frequencyLabel = (fc) => {
@@ -183,7 +216,7 @@ export default function FixedCostManager() {
             {["expense", "income"].map((tp) => (
               <button
                 key={tp}
-                onClick={() => setForm((f) => ({ ...f, type: tp }))}
+                onClick={() => setForm((f) => ({ ...f, type: tp, category: defaultCategoryFor(tp) }))}
                 className={`flex-1 py-2.5 rounded-xl font-bold text-sm transition-all ${
                   form.type === tp
                     ? tp === "expense"
@@ -195,6 +228,33 @@ export default function FixedCostManager() {
                 {tp === "expense" ? t("form_expense") : t("form_income")}
               </button>
             ))}
+          </div>
+
+          {/* Category picker */}
+          <div className="mb-4">
+            <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-1.5 uppercase tracking-wide">{t("form_category")}</label>
+            <div className={`grid gap-2 ${form.type === "income" ? "grid-cols-3" : "grid-cols-4"}`}>
+              {getCategoriesForType(form.type).map((c) => {
+                const selected = form.category === c.id;
+                const cc = COLOR_CLASSES[c.color];
+                const Icon = c.Icon;
+                return (
+                  <button
+                    key={c.id}
+                    type="button"
+                    onClick={() => setForm((f) => ({ ...f, category: c.id }))}
+                    className={`flex flex-col items-center gap-1 py-2.5 px-1 rounded-xl border-2 transition-all text-[11px] font-bold ${
+                      selected
+                        ? `${cc.bg} ${cc.text} border-current shadow-sm`
+                        : "bg-white/50 dark:bg-slate-900/30 border-transparent text-slate-500 dark:text-slate-400 hover:bg-white/80 dark:hover:bg-slate-800/50"
+                    }`}
+                  >
+                    <Icon size={16} />
+                    {t(c.labelKey)}
+                  </button>
+                );
+              })}
+            </div>
           </div>
 
           {/* Amount */}
@@ -314,11 +374,16 @@ export default function FixedCostManager() {
               }`}
             >
               <div className="flex items-center gap-3">
-                <div className={`w-11 h-11 shrink-0 rounded-xl flex items-center justify-center font-extrabold text-white text-sm shadow ${
-                  fc.type === "income" ? "bg-gradient-to-br from-emerald-400 to-emerald-600" : "bg-gradient-to-br from-red-400 to-red-600"
-                }`}>
-                  {fc.type === "income" ? "+" : "−"}
-                </div>
+                {(() => {
+                  const cat = getCategoryById(fc.category, fc.type);
+                  const cc = COLOR_CLASSES[cat.color];
+                  const Icon = cat.Icon;
+                  return (
+                    <div className={`w-11 h-11 shrink-0 rounded-xl flex items-center justify-center shadow ${cc.bg} ${cc.text}`}>
+                      <Icon size={20} />
+                    </div>
+                  );
+                })()}
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 flex-wrap">
                     <span className="font-extrabold text-slate-800 dark:text-slate-100 truncate">{fc.description}</span>
@@ -327,7 +392,7 @@ export default function FixedCostManager() {
                         ? "bg-sky-100 text-sky-700 dark:bg-sky-900/40 dark:text-sky-400"
                         : "bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-400"
                     }`}>
-                      {isApplied ? t("fixed_applied") : t("fixed_pending")}
+                      {isApplied ? t("fixed_applied") : pendingLabel(fc)}
                     </span>
                   </div>
                   <p className="text-lg font-extrabold text-slate-800 dark:text-slate-100">
@@ -337,7 +402,7 @@ export default function FixedCostManager() {
                 </div>
                 <div className="flex flex-col items-end gap-1.5 shrink-0">
                   <button
-                    onClick={() => setFixedCosts(toggleFixedCost(fc.id, fixedCosts))}
+                    onClick={() => setFixedCosts(toggleFixedCost(fc.id, loadFixedCosts()))}
                     className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${fc.isActive ? "bg-violet-500" : "bg-slate-300 dark:bg-slate-600"}`}
                   >
                     <span className={`inline-block h-4 w-4 rounded-full bg-white shadow transition-transform ${fc.isActive ? "translate-x-6" : "translate-x-1"}`} />

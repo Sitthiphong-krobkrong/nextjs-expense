@@ -1,6 +1,7 @@
 import Swal from 'sweetalert2';
 import * as XLSX from 'xlsx';
 import { loadTransactions, addTransactionsBatch } from './transactionService';
+import { loadFixedCosts } from './fixedCostService';
 const STORAGE_KEY = 'transactions';
 export function exportExcelFromLocalStorage_v1(fileName = 'data.xlsx') {
     const data = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
@@ -32,23 +33,17 @@ export function exportExcelFromLocalStorage(fileNamePrefix = 'data') {
         `${pad(now.getHours())}${pad(now.getMinutes())}${pad(now.getSeconds())}_` +
         `${fileNamePrefix}.xlsx`;
 
-    // สร้าง sheet แรกจาก parsed JSON
+    const fixedCosts = loadFixedCosts();
+    const fixedRaw = JSON.stringify(fixedCosts);
+
     const worksheet1 = XLSX.utils.json_to_sheet(data);
-
-    // สร้าง sheet สองจาก raw JSON
-    // ทางเลือก A: แปะทั้งก้อนใน cell A1
     const worksheet2 = XLSX.utils.aoa_to_sheet([[rawJson]]);
-
-    // *** ถ้าอยากแยกบรรทัดให้ดูอ่านง่าย ให้ใช้แบบนี้แทน ***
-    //  const lines = rawJson.split('\n');
-    //  const worksheet2 = XLSX.utils.aoa_to_sheet(
-    //    [['rawJson']], 
-    //    lines.map(line => [line])
-    //  );
+    const worksheet3 = XLSX.utils.aoa_to_sheet([[fixedRaw]]);
 
     const workbook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(workbook, worksheet1, 'data');
     XLSX.utils.book_append_sheet(workbook, worksheet2, 'jsonData');
+    XLSX.utils.book_append_sheet(workbook, worksheet3, 'fixedCostsData');
 
     XLSX.writeFile(workbook, fileName);
 }
@@ -117,6 +112,20 @@ export function importExcelToLocalStorage(file) {
         if (valid.length === 0) {
           reject(new Error('No valid transactions found'));
           return;
+        }
+
+        // Import fixed costs if sheet exists
+        const fcSheet = workbook.Sheets['fixedCostsData'];
+        if (fcSheet) {
+          const raw = fcSheet['A1']?.v;
+          if (raw && typeof raw === 'string') {
+            try {
+              const parsedFc = JSON.parse(raw);
+              if (Array.isArray(parsedFc) && parsedFc.length > 0) {
+                localStorage.setItem('fixedCosts', JSON.stringify(parsedFc));
+              }
+            } catch { /* ignore malformed fixed costs */ }
+          }
         }
 
         // Merge into existing data

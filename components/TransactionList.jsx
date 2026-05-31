@@ -1,4 +1,4 @@
-import { useState, Fragment } from "react";
+import { useState, useEffect, useMemo, Fragment } from "react";
 import { useLang } from "../app/hooks/useLanguage";
 import { getCategoryById, COLOR_CLASSES } from "../lib/categories";
 
@@ -51,16 +51,33 @@ function DateHeader({ dateKey, items, locale, lang }) {
 export default function TransactionList({ items, onEdit, onDelete }) {
   const PAGE_SIZE = 10;
   const [currentPage, setCurrentPage] = useState(1);
+  const [showFilters, setShowFilters] = useState(false);
+  const [search, setSearch] = useState("");
+  const [typeFilter, setTypeFilter] = useState("all");
+  const [minAmt, setMinAmt] = useState("");
+  const [maxAmt, setMaxAmt] = useState("");
   const { t, lang } = useLang();
   const locale = lang === "th" ? "th-TH" : "en-GB";
 
-  const sortedItems = [...items].sort((a, b) => {
-    // เรียงตามวันที่ล่าสุดก่อน ถ้าวันเดียวกันเรียงตาม id ล่าสุด
-    const dateA = a.date ? a.date.substring(0, 10) : "";
-    const dateB = b.date ? b.date.substring(0, 10) : "";
-    if (dateB !== dateA) return dateB > dateA ? 1 : -1;
-    return b.id - a.id;
-  });
+  const q = search.trim().toLowerCase();
+  const min = minAmt !== "" ? parseFloat(minAmt) : null;
+  const max = maxAmt !== "" ? parseFloat(maxAmt) : null;
+  const filteredItems = items
+    .filter((tx) => typeFilter === "all" || tx.type === typeFilter)
+    .filter((tx) => !q || tx.description?.toLowerCase().includes(q))
+    .filter((tx) => min === null || tx.amount >= min)
+    .filter((tx) => max === null || tx.amount <= max);
+
+  useEffect(() => { setCurrentPage(1); }, [filteredItems]);
+
+  const sortedItems = useMemo(() =>
+    [...filteredItems].sort((a, b) => {
+      const dateA = a.date ? a.date.substring(0, 10) : "";
+      const dateB = b.date ? b.date.substring(0, 10) : "";
+      if (dateB !== dateA) return dateB > dateA ? 1 : -1;
+      return b.id - a.id;
+    }),
+  [filteredItems]);
   const totalPages = Math.ceil(sortedItems.length / PAGE_SIZE);
   const pagedItems = sortedItems.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE);
   const groups = groupByDate(pagedItems);
@@ -70,20 +87,115 @@ export default function TransactionList({ items, onEdit, onDelete }) {
       <div className="absolute top-0 right-0 w-64 h-64 bg-sky-100/30 rounded-full blur-3xl pointer-events-none" />
 
       {/* Header */}
-      <div className="px-5 py-4 border-b flex justify-between items-center relative z-10 border-sky-50/50 dark:border-slate-700/50 bg-gradient-to-br from-sky-50/50 to-sky-50/50 dark:from-slate-900/50 dark:to-slate-800/50">
-        <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-xl flex items-center justify-center bg-white/70 dark:bg-white/10">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" className="text-sky-700 dark:text-sky-400" strokeWidth="2">
-              <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2"/>
-              <rect x="9" y="3" width="6" height="4" rx="1"/>
-              <path d="M9 12h6M9 16h4"/>
+      <div className="px-5 py-4 border-b flex flex-col gap-3 relative z-10 overflow-hidden border-sky-50/50 dark:border-slate-700/50 bg-gradient-to-br from-sky-50/50 to-sky-50/50 dark:from-slate-900/50 dark:to-slate-800/50">
+        <div className="flex justify-between items-center">
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 rounded-xl flex items-center justify-center bg-white/70 dark:bg-white/10">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" className="text-sky-700 dark:text-sky-400" strokeWidth="2">
+                <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2"/>
+                <rect x="9" y="3" width="6" height="4" rx="1"/>
+                <path d="M9 12h6M9 16h4"/>
+              </svg>
+            </div>
+            <div>
+              <h2 className="text-lg font-semibold text-sky-900 dark:text-slate-200">{t("list_title")}</h2>
+              <p className="text-xs text-sky-700 dark:text-slate-400">
+                {(q || typeFilter !== "all" || minAmt || maxAmt) ? `${filteredItems.length} / ${items.length}` : items.length} {lang === "th" ? "รายการ" : "transactions"}
+              </p>
+            </div>
+          </div>
+
+          {/* Filter toggle button */}
+          <button
+            onClick={() => setShowFilters((v) => !v)}
+            className={`relative flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold transition-all ${
+              showFilters
+                ? "bg-sky-500 text-white shadow-sm"
+                : "bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700"
+            }`}
+          >
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/>
             </svg>
-          </div>
-          <div>
-            <h2 className="text-lg font-semibold text-sky-900 dark:text-slate-200">{t("list_title")}</h2>
-            <p className="text-xs text-sky-700 dark:text-slate-400">{items.length} {lang === "th" ? "รายการ" : "transactions"}</p>
-          </div>
+            {lang === "th" ? "กรอง" : "Filter"}
+            {(q || typeFilter !== "all" || minAmt || maxAmt) && (
+              <span className="absolute -top-1.5 -right-1.5 w-4 h-4 rounded-full bg-rose-500 text-white text-[9px] font-black flex items-center justify-center">
+                {[q, typeFilter !== "all", minAmt, maxAmt].filter(Boolean).length}
+              </span>
+            )}
+          </button>
         </div>
+
+        {/* Collapsible filters */}
+        {showFilters && (
+          <>
+            {/* Type filter */}
+            <div className="flex gap-1.5">
+              {[
+                { key: "all", label: lang === "th" ? "ทั้งหมด" : "All" },
+                { key: "income", label: lang === "th" ? "รายรับ" : "Income" },
+                { key: "expense", label: lang === "th" ? "รายจ่าย" : "Expense" },
+              ].map(({ key, label }) => (
+                <button
+                  key={key}
+                  onClick={() => setTypeFilter(key)}
+                  className={`px-3 py-1 rounded-lg text-xs font-bold transition-all ${
+                    typeFilter === key
+                      ? key === "income"
+                        ? "bg-emerald-500 text-white shadow-sm"
+                        : key === "expense"
+                        ? "bg-rose-500 text-white shadow-sm"
+                        : "bg-sky-500 text-white shadow-sm"
+                      : "bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700"
+                  }`}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
+
+            {/* Search */}
+            <div className="relative">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none">
+                <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+              </svg>
+              <input
+                type="text" value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                placeholder={lang === "th" ? "ค้นหารายการ..." : "Search..."}
+                className="w-full pl-8 pr-8 py-2 text-sm rounded-xl border border-slate-200 dark:border-slate-700 bg-white/70 dark:bg-slate-800/70 text-slate-700 dark:text-slate-200 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-sky-400/40"
+              />
+              {search && (
+                <button onClick={() => setSearch("")} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M18 6 6 18M6 6l12 12"/></svg>
+                </button>
+              )}
+            </div>
+
+            {/* Amount range */}
+            <div className="flex items-center gap-1.5 min-w-0">
+              <span className="text-xs text-slate-400 shrink-0">฿</span>
+              <input
+                type="number" min="0" value={minAmt}
+                onChange={(e) => setMinAmt(e.target.value)}
+                placeholder={lang === "th" ? "ขั้นต่ำ" : "Min"}
+                className="flex-1 min-w-0 w-0 px-2.5 py-1.5 text-xs rounded-xl border border-slate-200 dark:border-slate-700 bg-white/70 dark:bg-slate-800/70 text-slate-700 dark:text-slate-200 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-sky-400/40"
+              />
+              <span className="text-xs text-slate-400 shrink-0">—</span>
+              <input
+                type="number" min="0" value={maxAmt}
+                onChange={(e) => setMaxAmt(e.target.value)}
+                placeholder={lang === "th" ? "สูงสุด" : "Max"}
+                className="flex-1 min-w-0 w-0 px-2.5 py-1.5 text-xs rounded-xl border border-slate-200 dark:border-slate-700 bg-white/70 dark:bg-slate-800/70 text-slate-700 dark:text-slate-200 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-sky-400/40"
+              />
+              {(minAmt || maxAmt) && (
+                <button onClick={() => { setMinAmt(""); setMaxAmt(""); }} className="shrink-0 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M18 6 6 18M6 6l12 12"/></svg>
+                </button>
+              )}
+            </div>
+          </>
+        )}
       </div>
 
       {/* Content */}
@@ -122,6 +234,7 @@ export default function TransactionList({ items, onEdit, onDelete }) {
                         {/* Info */}
                         <div className="flex-1 min-w-0">
                           <p className="text-[14px] font-extrabold truncate text-slate-800 dark:text-white">{tx.description}</p>
+                          {tx.note && <p className="text-[11px] text-slate-400 dark:text-slate-500 truncate mt-0.5">{tx.note}</p>}
                           <div className="flex items-center gap-1.5 flex-wrap">
                             <span className={`text-[10px] font-black tracking-wider px-1.5 py-0.5 rounded-md ${cc.bg} ${cc.text}`}>
                               {t(cat.labelKey)}

@@ -8,12 +8,14 @@ import {
 } from "../../services/transactionService";
 import TransactionForm from "../../components/TransactionForm";
 import FixedCostManager from "../../components/FixedCostManager";
+import BudgetManager from "../../components/BudgetManager";
 import { useLang } from "../hooks/useLanguage";
 
 function AddPageContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const editId = searchParams.get("edit");
+  const dateParam = searchParams.get("date");
   const [transactions, setTransactions] = useState(() => loadTransactions());
   const [tab, setTab] = useState("add");
   const { t } = useLang();
@@ -86,33 +88,25 @@ function AddPageContent() {
           </p>
         </div>
 
-        <div className="flex gap-2 mb-6 p-1.5 bg-slate-100 dark:bg-slate-800/60 rounded-2xl">
-          <button
-            onClick={() => setTab("add")}
-            className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl font-bold text-sm transition-all ${
-              tab === "add"
-                ? "bg-white dark:bg-slate-700 text-slate-800 dark:text-slate-100 shadow-sm"
-                : "text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300"
-            }`}
-          >
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-              <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
-            </svg>
-            {t("add_page_title")}
-          </button>
-          <button
-            onClick={() => setTab("fixed")}
-            className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl font-bold text-sm transition-all ${
-              tab === "fixed"
-                ? "bg-white dark:bg-slate-700 text-slate-800 dark:text-slate-100 shadow-sm"
-                : "text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300"
-            }`}
-          >
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-              <path d="M17 3a2.83 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/>
-            </svg>
-            {t("fixed_title")}
-          </button>
+        <div className="flex gap-1.5 mb-6 p-1.5 bg-slate-100 dark:bg-slate-800/60 rounded-2xl">
+          {[
+            { key: "add", icon: <><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></>, label: t("add_page_title") },
+            { key: "fixed", icon: <path d="M17 3a2.83 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/>, label: t("fixed_title") },
+            { key: "budget", icon: <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>, label: t("budget_title") },
+          ].map(({ key, icon, label }) => (
+            <button
+              key={key}
+              onClick={() => setTab(key)}
+              className={`flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-xl font-bold text-xs transition-all ${
+                tab === key
+                  ? "bg-white dark:bg-slate-700 text-slate-800 dark:text-slate-100 shadow-sm"
+                  : "text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300"
+              }`}
+            >
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">{icon}</svg>
+              {label}
+            </button>
+          ))}
         </div>
 
         {tab === "add" ? (
@@ -122,9 +116,12 @@ function AddPageContent() {
             editing={null}
             onCancel={handleCancel}
             onNavigateHome={handleNavigateHome}
+            defaultDate={dateParam}
           />
-        ) : (
+        ) : tab === "fixed" ? (
           <FixedCostManager />
+        ) : (
+          <BudgetManager />
         )}
 
         <div className="h-20 sm:h-0" />

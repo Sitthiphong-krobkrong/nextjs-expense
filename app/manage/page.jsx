@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from "react";
 import { useTheme } from "next-themes";
 import Swal from "sweetalert2";
-import { deleteAllTransactions } from "@/services/transactionService";
+import { deleteAllTransactions, loadTransactions, deleteTransaction } from "@/services/transactionService";
 import { exportExcelFromLocalStorage, importExcelToLocalStorage } from "@/services/manageService";
 import { useLang } from "../hooks/useLanguage";
 
@@ -11,7 +11,27 @@ export default function ManagePage() {
     const [mounted, setMounted] = useState(false);
     useEffect(() => setMounted(true), []);
     const isDark = mounted && resolvedTheme === "dark";
-    const { t } = useLang();
+    const { t, lang } = useLang();
+    const [dupes, setDupes] = useState(null); // null = not scanned, [] = clean
+
+    const scanDuplicates = () => {
+        const txs = loadTransactions();
+        const seen = {};
+        const dupIds = new Set();
+        txs.forEach((tx) => {
+            const key = `${tx.description?.toLowerCase().trim()}|${tx.date?.substring(0,10)}|${tx.amount}|${tx.type}`;
+            if (seen[key]) { dupIds.add(tx.id); seen[key].push(tx.id); }
+            else seen[key] = [tx.id];
+        });
+        setDupes(txs.filter((tx) => dupIds.has(tx.id)));
+    };
+
+    const deleteDupe = (id) => {
+        const txs = loadTransactions();
+        deleteTransaction(id, txs);
+        setDupes((prev) => prev.filter((d) => d.id !== id));
+        window.dispatchEvent(new Event("transactions-updated"));
+    };
 
     return (
         <div className="min-h-screen py-12 px-4">
@@ -173,6 +193,160 @@ export default function ManagePage() {
                     </div>
 
                 </div>
+
+                {/* Duplicate detector */}
+                <div className={`flex flex-col gap-4 p-5 rounded-2xl border hover:shadow-md transition-shadow ${isDark ? "bg-violet-900/10 border-violet-900/50" : "bg-violet-50/30 border-violet-100"}`}>
+                    <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                        <div className="flex items-center gap-4">
+                            <div className={`p-3 rounded-xl shrink-0 ${isDark ? "bg-violet-900/50 text-violet-400" : "bg-violet-100/80 text-violet-600"}`}>
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                    <path d="M10 15v4a3 3 0 0 0 3 3l4-9V2H5.72a2 2 0 0 0-2 1.7l-1.38 9a2 2 0 0 0 2 2.3z"/>
+                                    <path d="M17 2h2.67A2.31 2.31 0 0 1 22 4v7a2.31 2.31 0 0 1-2.33 2H17"/>
+                                </svg>
+                            </div>
+                            <div>
+                                <h3 className={`text-lg font-semibold ${isDark ? "text-slate-200" : "text-gray-800"}`}>
+                                    {lang === "th" ? "ตรวจสอบรายการซ้ำ" : "Duplicate Detector"}
+                                </h3>
+                                <p className={`text-sm ${isDark ? "text-slate-400" : "text-gray-500"}`}>
+                                    {lang === "th" ? "สแกนหารายการที่ชื่อ+วันที่+จำนวนเหมือนกัน" : "Scan for same description + date + amount"}
+                                </p>
+                            </div>
+                        </div>
+                        <button
+                            className="w-full sm:w-auto shrink-0 px-6 py-2.5 bg-gradient-to-r from-violet-500 to-violet-600 text-white font-medium rounded-xl hover:from-violet-600 hover:to-violet-700 shadow-lg shadow-violet-500/30 transition-all hover:-translate-y-0.5"
+                            onClick={scanDuplicates}
+                        >
+                            {lang === "th" ? "สแกน" : "Scan"}
+                        </button>
+                    </div>
+
+                    {dupes !== null && (
+                        dupes.length === 0 ? (
+                            <p className="text-sm font-semibold text-emerald-600 dark:text-emerald-400 flex items-center gap-2">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M20 6 9 17l-5-5"/></svg>
+                                {lang === "th" ? "ไม่พบรายการซ้ำ" : "No duplicates found"}
+                            </p>
+                        ) : (
+                            <div className="flex flex-col gap-2">
+                                <p className="text-xs font-bold text-rose-500">
+                                    {lang === "th" ? `พบ ${dupes.length} รายการที่อาจซ้ำ` : `Found ${dupes.length} potential duplicates`}
+                                </p>
+                                <div className="max-h-64 overflow-y-auto flex flex-col gap-1.5">
+                                    {dupes.map((tx) => (
+                                        <div key={tx.id} className={`flex items-center justify-between gap-3 px-3 py-2 rounded-xl ${isDark ? "bg-slate-800/60" : "bg-white/70"}`}>
+                                            <div className="min-w-0">
+                                                <p className="text-sm font-semibold text-slate-700 dark:text-slate-200 truncate">{tx.description}</p>
+                                                <p className="text-xs text-slate-400">{tx.date?.substring(0,10)} · {tx.amount.toLocaleString()}฿</p>
+                                            </div>
+                                            <button
+                                                onClick={() => deleteDupe(tx.id)}
+                                                className="shrink-0 px-3 py-1.5 text-xs font-bold rounded-lg bg-rose-100 dark:bg-rose-900/30 text-rose-600 dark:text-rose-400 hover:bg-rose-200 transition-colors"
+                                            >
+                                                {lang === "th" ? "ลบ" : "Delete"}
+                                            </button>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        )
+                    )}
+                </div>
+
+                {/* Dev-only: seed test data */}
+                {process.env.NODE_ENV === "development" && (
+                    <div className={`mt-6 flex flex-col gap-3 p-5 rounded-2xl border border-dashed ${isDark ? "border-yellow-700/50 bg-yellow-900/10" : "border-yellow-300 bg-yellow-50/50"}`}>
+                        <p className="text-xs font-extrabold text-yellow-600 dark:text-yellow-400 uppercase tracking-widest">Dev Tools</p>
+
+                        {/* Seed fixed costs */}
+                        <button
+                            className="w-full py-2.5 rounded-xl font-bold text-sm bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-300 hover:bg-yellow-200 dark:hover:bg-yellow-900/50 transition-colors"
+                            onClick={() => {
+                                const base = Date.now();
+                                const fixedCosts = [
+                                    {
+                                        id: base + 1,
+                                        description: "ค่าเช่า (Monthly / วันที่ 5 / ครบกำหนดแล้ว)",
+                                        amount: 8000,
+                                        type: "expense",
+                                        frequency: "monthly",
+                                        dayOfMonth: 5,
+                                        startDate: "2026-01-01",
+                                        isActive: true,
+                                        lastApplied: "2026-04", // เดือนก่อน → ควร apply พ.ค.
+                                        createdAt: new Date().toISOString(),
+                                    },
+                                    {
+                                        id: base + 2,
+                                        description: "Netflix (Monthly / วันที่ 25 / ครบกำหนดแล้ว)",
+                                        amount: 329,
+                                        type: "expense",
+                                        frequency: "monthly",
+                                        dayOfMonth: 25,
+                                        startDate: "2026-03-01",
+                                        isActive: true,
+                                        lastApplied: "2026-04", // เดือนก่อน → ควร apply พ.ค.
+                                        createdAt: new Date().toISOString(),
+                                    },
+                                    {
+                                        id: base + 3,
+                                        description: "เงินเดือน (Monthly / วันที่ 25 / applied แล้ว)",
+                                        amount: 30000,
+                                        type: "income",
+                                        frequency: "monthly",
+                                        dayOfMonth: 25,
+                                        startDate: "2026-01-01",
+                                        isActive: true,
+                                        lastApplied: "2026-05", // เดือนนี้แล้ว → ไม่ควร apply ซ้ำ
+                                        createdAt: new Date().toISOString(),
+                                    },
+                                    {
+                                        id: base + 4,
+                                        description: "ประกันรายปี (Yearly / ยังไม่ถึงวัน วันที่ 1 มิ.ย.)",
+                                        amount: 12000,
+                                        type: "expense",
+                                        frequency: "yearly",
+                                        dayOfMonth: 1,
+                                        startDate: "2026-06-01", // วันพรุ่งนี้ → ยังไม่ควร apply
+                                        isActive: true,
+                                        lastApplied: "2025",
+                                        createdAt: new Date().toISOString(),
+                                    },
+                                    {
+                                        id: base + 5,
+                                        description: "Backfill 3 เดือน (Monthly / วันที่ 1 / ค้างมาจาก มี.ค.)",
+                                        amount: 500,
+                                        type: "expense",
+                                        frequency: "monthly",
+                                        dayOfMonth: 1,
+                                        startDate: "2026-03-01",
+                                        isActive: true,
+                                        lastApplied: "2026-02", // ค้าง 3 เดือน → ควร backfill มี.ค. เม.ย. พ.ค.
+                                        createdAt: new Date().toISOString(),
+                                    },
+                                ];
+                                localStorage.setItem("fixedCosts", JSON.stringify(fixedCosts));
+                                window.dispatchEvent(new Event("transactions-updated"));
+                                Swal.fire({ icon: "success", title: "Seeded fixed costs!", text: `${fixedCosts.length} รายการ`, timer: 1500, showConfirmButton: false });
+                            }}
+                        >
+                            Seed Fixed Costs (5 รายการ)
+                        </button>
+
+                        {/* Clear fixed costs only */}
+                        <button
+                            className="w-full py-2.5 rounded-xl font-bold text-sm bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 hover:bg-red-200 dark:hover:bg-red-900/50 transition-colors"
+                            onClick={() => {
+                                localStorage.removeItem("fixedCosts");
+                                window.dispatchEvent(new Event("transactions-updated"));
+                                Swal.fire({ icon: "success", title: "Cleared fixedCosts", timer: 1200, showConfirmButton: false });
+                            }}
+                        >
+                            Clear Fixed Costs
+                        </button>
+                    </div>
+                )}
+
             </div>
         </div>
     );

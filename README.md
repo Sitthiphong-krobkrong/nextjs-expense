@@ -64,21 +64,53 @@ Deploy เป็น Static Site ผ่าน **Vercel**
 
 ## Features
 
+### 💰 รายการ (Transactions)
 - เพิ่ม / แก้ไข / ลบ รายรับและรายจ่าย พร้อมเลือกวันที่ย้อนหลังได้
-- **หน้าเพิ่ม/แก้ไขรายการแยกต่างหาก** (`/add`) — รองรับทั้งเพิ่มใหม่และแก้ไขรายการเดิม
-- Dashboard: Doughnut chart สรุปภาพรวม + Bar chart รายรับ-รายจ่ายย้อนหลัง 6 เดือน
-- **Toggle มุมมอง Dashboard** — สลับดู "ทั้งหมด" หรือ "เดือนนี้" ได้ทันที
+- **หมวดหมู่ (Category)** — 8 หมวดรายจ่าย + 3 หมวดรายรับ พร้อม icon และสี
+- **Note / Memo** — เพิ่มโน้ตเพิ่มเติมต่อรายการ
+- **Voice Input** — พูดเพื่อบันทึกรายการผ่าน Web Speech API (ไทย / อังกฤษ)
+- แจ้งเตือนเมื่อกรอกวันที่อยู่ในเดือนถัดไป (จะไม่แสดงใน "เดือนนี้")
+
+### 📊 Dashboard
+- Doughnut chart สรุปภาพรวม + Bar chart รายรับ-รายจ่ายย้อนหลัง 6 เดือน
+- **Toggle มุมมอง** — สลับดู "ทั้งหมด" หรือ "เดือนนี้" label เปลี่ยนตาม
 - ซ่อน/แสดงยอดเงินใน stat cards (Privacy toggle)
-- ปฏิทินการเงิน (Calendar) — ดูรายวันและรายสัปดาห์ พร้อม heatmap และ expand รายการ
-- **ค่าใช้จ่ายประจำ (Fixed Costs)** — ตั้งรายการรายเดือน/รายปี ระบบจะ auto apply เมื่อถึงกำหนด
-- Bottom navigation bar สำหรับ mobile
-- ตารางรายการ แบ่งหน้า 10 รายการต่อหน้า (เรียงตามวันที่ล่าสุดก่อน)
-- **Import / Export Excel** — นำเข้าและส่งออกข้อมูลเป็นไฟล์ .xlsx
-- ลบข้อมูลทั้งหมดพร้อม Confirmation dialog
-- Voice Input — พูดเพื่อบันทึกรายการผ่าน Web Speech API
-- รองรับ 2 ภาษา: ไทย / English (สลับได้ทันที, จำค่าไว้ใน localStorage)
-- Dark / Light mode (ธีมสีเขียว Emerald)
-- Responsive — รองรับมือถือและ desktop
+- **Category Breakdown** — รายจ่ายแตก % ตามหมวดพร้อม progress bar
+- **Month-over-month** — เปรียบเทียบ % เทียบเดือนก่อนในแต่ละหมวด
+- **Upcoming Fixed Costs** — แสดงรายการประจำที่กำลังจะมาถึงพร้อม countdown
+
+### 📅 ปฏิทิน (Calendar)
+- ดูรายวันพร้อม heatmap และรายสัปดาห์แบบ expandable
+- **Year navigation** — กด « / » ข้ามปีได้ทันที
+- **Fixed cost markers** — จุดสีม่วงบนวันที่มีค่าใช้จ่ายประจำกำหนด
+- **Quick-add** — กดวันแล้วเพิ่มรายการได้เลย (วันที่ pre-fill อัตโนมัติ)
+- สรุปรายรับ / รายจ่าย / คงเหลือ 3 cards ต่อเดือน
+
+### 🔁 ค่าใช้จ่ายประจำ (Fixed Costs)
+- ตั้งรายการรายเดือน/รายปี — ระบบ auto apply เมื่อถึงกำหนด
+- Backfill ย้อนหลังหลายเดือน (กรณีเปิดแอปข้ามรอบ)
+- เลือกหมวดหมู่ได้ badge แสดงวันที่จะ apply ถัดไป
+
+### 💵 งบประมาณ (Budget)
+- **ตั้งวงเงินต่อ category** — progress bar เขียว → เหลือง → แดง
+- แจ้งเตือนเมื่อใช้งบ ≥ 80% และเมื่อเกินงบ
+
+### 🔍 ค้นหา & กรอง
+- ค้นหาตามชื่อรายการ
+- กรองตามประเภท (ทั้งหมด / รายรับ / รายจ่าย)
+- กรองตามช่วงจำนวนเงิน (ขั้นต่ำ–สูงสุด)
+- Badge แสดงจำนวน filter ที่ active
+
+### 📁 จัดการข้อมูล
+- **Import / Export Excel** — รวม transactions + fixed costs ในไฟล์เดียว
+- **Duplicate Detector** — สแกนและลบรายการซ้ำในคลิกเดียว
+- ลบข้อมูลทั้งหมดพร้อม confirmation (fixed costs ยังคงอยู่)
+
+### 📱 PWA & UX
+- **PWA** — ติดตั้งบน home screen ได้ (Add to Home Screen)
+- Bottom navigation bar สำหรับ mobile (breakpoint md = 768px)
+- รองรับ 2 ภาษา: ไทย / English (สลับได้ทันที)
+- Dark / Light mode
 - ข้อมูลเก็บใน localStorage (Client-side, ไม่ต้องมี Backend)
 
 ---
@@ -258,16 +290,22 @@ nextjs-expense/
 
 ## Roadmap
 
-Feature ที่วางแผนจะเพิ่มในอนาคต:
+### ✅ Completed
+- [x] ค้นหารายการ + กรองตามประเภท + กรองตามช่วงราคา
+- [x] หมวดหมู่ (Category) พร้อม icon, color, breakdown chart
+- [x] ตั้งงบประมาณรายเดือนต่อ category พร้อม progress bar
+- [x] PWA (Progressive Web App) — ติดตั้งบน home screen ได้
+- [x] Month-over-month comparison
+- [x] Duplicate detector
+- [x] Note/memo ต่อรายการ
+- [x] Calendar: year nav, fixed cost markers, quick-add, net balance
 
-- [ ] ค้นหารายการ — พิมพ์ชื่อเพื่อหารายการได้เร็วขึ้น
-- [ ] กรองตามประเภท — ดูเฉพาะรายรับ หรือเฉพาะรายจ่าย
-- [ ] ตั้งงบประมาณรายเดือน — ตั้งเป้าค่าใช้จ่าย พร้อม progress bar
-- [ ] หมวดหมู่ (Category) — เช่น อาหาร, เดินทาง, ที่พัก พร้อม breakdown chart
-- [ ] PWA (Progressive Web App) — ติดตั้งเป็นแอปบนมือถือ ใช้ offline ได้
-- [ ] Backup/Restore ผ่าน QR Code หรือ Link — ย้ายข้อมูลข้ามเครื่องโดยไม่ต้องมี server
+### 🔜 In Progress / Planned
+- [ ] Backup/Restore ผ่าน QR Code — ย้ายข้อมูลข้ามเครื่องโดยไม่ต้องมี server
 - [ ] Import จาก CSV
 - [ ] Migrate JSX ทั้งหมดเป็น TypeScript
+- [ ] Savings goal tracker — ตั้งเป้าเก็บเงิน + progress
+- [ ] Service Worker (offline support) — ตอนนี้ PWA ติดตั้งได้แต่ยังต้องใช้ internet
 
 ---
 

@@ -1,5 +1,5 @@
 "use client";
-import { useState, useRef, useCallback } from "react";
+import { useState, useRef, useCallback, useEffect } from "react";
 
 interface SpeechResult {
   transcript: string;
@@ -48,7 +48,7 @@ function parseTranscript(text: string): SpeechResult {
   return { transcript, description, amount, type };
 }
 
-export default function useSpeechRecognition() {
+export default function useSpeechRecognition(lang = "th") {
   const [isListening, setIsListening] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const recognitionRef = useRef<any>(null);
@@ -56,6 +56,19 @@ export default function useSpeechRecognition() {
   const isSupported =
     typeof window !== "undefined" &&
     ("SpeechRecognition" in window || "webkitSpeechRecognition" in window);
+
+  // cleanup เมื่อ unmount — mic จะปิดทันที
+  useEffect(() => {
+    return () => {
+      if (recognitionRef.current) {
+        recognitionRef.current.onresult = null;
+        recognitionRef.current.onerror = null;
+        recognitionRef.current.onend = null;
+        recognitionRef.current.stop();
+        recognitionRef.current = null;
+      }
+    };
+  }, []);
 
   const startListening = useCallback(
     (onResult: (result: SpeechResult) => void) => {
@@ -70,7 +83,7 @@ export default function useSpeechRecognition() {
         (window as any).webkitSpeechRecognition;
 
       const recognition = new SpeechRecognition();
-      recognition.lang = "th-TH";
+      recognition.lang = lang === "th" ? "th-TH" : "en-US";
       recognition.continuous = false;
       recognition.interimResults = false;
       recognition.maxAlternatives = 1;
@@ -100,7 +113,7 @@ export default function useSpeechRecognition() {
       recognitionRef.current = recognition;
       recognition.start();
     },
-    [isSupported]
+    [isSupported, lang]
   );
 
   const stopListening = useCallback(() => {
